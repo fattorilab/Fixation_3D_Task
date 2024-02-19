@@ -1,0 +1,1 @@
+nome originale: CalibrationTaskStefV1.9
