@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Globalization;
 using UnityEngine;
 using PupilLabs;
 using Newtonsoft.Json;  
@@ -12,14 +13,19 @@ using Newtonsoft.Json.Linq;
 public class FixationTask : MonoBehaviour
 {
     [SerializeField]
-    
+
+    [HideInInspector]
     [Header("Collegamenti")]
     public PupilDataStream PupilDataStreamScript;
     private RequestController RequestControllerScript;
     private bool PupilDataConnessionStatus;
-    public GameObject Player;
+    [HideInInspector] public GameObject Player;
 
-    
+    [Header("Saving info")]
+    public string MEF;
+    public string path_to_data = "C:/Users/admin/Desktop/Registrazioni_VR/";
+
+
     [Header("Target Info")]
     public string file_name_positions; 
     public GameObject TargetPrefab; GameObject Target; // qui ci andra il prefab
@@ -46,7 +52,8 @@ public class FixationTask : MonoBehaviour
 
     [Header("Trials Info")]
     
-    public int state; 
+    public int state;
+    public int last_state;
     public int error_state; 
     public int trials_tot;   
     public int trials_win;         
@@ -87,6 +94,7 @@ public class FixationTask : MonoBehaviour
         }
      
         state = 0;
+        last_state = -1;
         error_state = 0;
         trials_tot = 0;
         trials_win = 0;
@@ -159,14 +167,39 @@ public class FixationTask : MonoBehaviour
             switch (state)
             {
                 case 0:
+                    if (last_state != 0)
+                    {
+                        last_state = 0; //track that we were in state 0
+
+                        randomIndex = Random.Range(0, target_label.Count); // add  fra 22/feb/2024
+                        TargetCurrentLabel = target_label[randomIndex]; // add  fra 22/feb/2024
+                        TargetCurrentPosition = positions[TargetCurrentLabel]; // add  fra 22/feb/2024
+                        Target = Instantiate(TargetPrefab, TargetCurrentPosition, TargetPrefab.transform.rotation);
+                        Target.transform.localScale = TargetSize;
+                        Target.GetComponent<MeshRenderer>().enabled = false;
+                        //Renderer renderer = Target.GetComponent<Renderer>();
+                        //renderer.enabled = false;
+
+                        GetComponent<Saver>().addObject(TargetCurrentLabel.ToString(),
+                            Target.transform.localPosition.x,
+                            Target.transform.localPosition.y,
+                            Target.transform.localPosition.z,
+                            Target.transform.localScale.x,
+                            Target.transform.localScale.y,
+                            Target.transform.localScale.z,
+                            Target.transform.localRotation.x,
+                            Target.transform.localRotation.y,
+                            Target.transform.localRotation.z);
+                    }
+
                     if (arduX == 0 && arduY == 0)
                     {
                         Debug.Log("FREE");
                         state = 1;
                         error_state = 0;
-                     
-                        randomIndex = Random.Range(0, target_label.Count);
-                        TargetCurrentLabel = target_label[randomIndex];
+                        
+                        //randomIndex = Random.Range(0, target_label.Count); comment fra 22/feb/2024
+                        //TargetCurrentLabel = target_label[randomIndex];
                         
                         set_epochs_duration();
                         trials_tot++;
@@ -180,14 +213,20 @@ public class FixationTask : MonoBehaviour
                     break;
 
                 case 1:
+                    if (last_state != 1)
+                    {
+                        last_state = 1; //track that we were in state 1
+                    }
                     if ((Time.time - lastevent) >= BLACK_duration && arduX == 0 && arduY == 0) 
                     {
                         Debug.Log("DELAY");
-                        TargetCurrentPosition = positions[TargetCurrentLabel];
-                        Target = Instantiate(TargetPrefab, TargetCurrentPosition, TargetPrefab.transform.rotation);
+                        //TargetCurrentPosition = positions[TargetCurrentLabel]; comment fra 22/feb/2024
+                        //Target = Instantiate(TargetPrefab, TargetCurrentPosition, TargetPrefab.transform.rotation);
 
-                        Target.transform.localScale = TargetSize;
+                        //Target.transform.localScale = TargetSize;
 
+                        /* comment fra 22/feb/2024 
+                        
                         GetComponent<Saver>().addObject(TargetCurrentLabel.ToString(),
                             Target.transform.localPosition.x,
                             Target.transform.localPosition.y,
@@ -198,7 +237,8 @@ public class FixationTask : MonoBehaviour
                             Target.transform.localRotation.x,
                             Target.transform.localRotation.y,
                             Target.transform.localRotation.z);
-
+                        */
+                        Target.GetComponent<MeshRenderer>().enabled = true;
                         Target.GetComponent<MeshRenderer>().material.color = Color.green;
                         state = 2;
                         lastevent = Time.time;
@@ -213,6 +253,10 @@ public class FixationTask : MonoBehaviour
                     break;
 
                 case 2:
+                    if (last_state != 2)
+                    {
+                        last_state = 2; //track that we were in state 1
+                    }
                     if ((Time.time - lastevent) >= GREEN_duration && arduX == 0 && arduY == 0)
                     {
                         Debug.Log("RT");
@@ -231,6 +275,10 @@ public class FixationTask : MonoBehaviour
                     break;
 
                 case 3:
+                    if (last_state != 3)
+                    {
+                        last_state = 3; //track that we were in state 1
+                    }
                     if ((Time.time - lastevent) <= RED_duration && (arduX != 0 || arduY != 0 || Input.GetKey("space")))
                     {
                         //Debug.Log("RT");
@@ -288,7 +336,7 @@ public class FixationTask : MonoBehaviour
     void reset_lose()
     {
         Debug.Log("FAIL");
-        Debug.Log(TargetCurrentLabel.ToString());
+        //Debug.Log(TargetCurrentLabel.ToString());
         GetComponent<Saver>().addObjectEnd(TargetCurrentLabel.ToString());
         Destroy(Target);
 
@@ -336,7 +384,9 @@ public class FixationTask : MonoBehaviour
                     if (fields.Length >= 3)
                     {
                         float x, y, z;
-                        if (float.TryParse(fields[0], out x) && float.TryParse(fields[1], out y) && float.TryParse(fields[2], out z))
+                        if (float.TryParse(fields[0], NumberStyles.Float, CultureInfo.InvariantCulture, out x) && 
+                            float.TryParse(fields[1], NumberStyles.Float, CultureInfo.InvariantCulture, out y) && 
+                            float.TryParse(fields[2], NumberStyles.Float, CultureInfo.InvariantCulture, out z))
                         {
                             Vector3 position = new Vector3(x, y, z);
                             positions.Add(position);

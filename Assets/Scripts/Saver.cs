@@ -13,16 +13,16 @@ using UnityEditor;
 
 public class Saver : MonoBehaviour
 {
-    public long starttime = 0;
+    [HideInInspector] public long starttime = 0;
     private long time = 0;
-    
-    public GameObject ARDUINOSaver;
+
+    [HideInInspector] public GameObject ARDUINO;
     FixationTask FixationTask;
-    public PupilDataStream PupilDataStreamSaver;
+    [HideInInspector] public PupilDataStream PupilDataStreamSaver;
     private string currentDate;
     private string currentTime;
-    private string filePath_OneTime;
-    public string filePath;
+    private string path_to_data_OneTime;
+    [HideInInspector] public string path_to_data;
     private RequestController RequestControllerScript;
     //private string new_Param; 
     // per il salvataggioDB
@@ -35,19 +35,24 @@ public class Saver : MonoBehaviour
         System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
         DB = GameObject.Find("DB");
-        // Dal setup sperimentale sava i dati 
-        //filePath = "C:/Users/stefa/Documents/Unity Projects/Registrazioni VR/";
         
-        ARDUINOSaver = GameObject.Find("ARDUINO");
+        ARDUINO = GameObject.Find("ARDUINO");
 
-        //Debug.Log("File are saved in " + filePath); 
+        //Debug.Log("File are saved in " + path_to_data); 
         RequestControllerScript = GameObject.Find("PupilDataManagment").GetComponent<RequestController>();
 
         FixationTask = GetComponent<FixationTask>();
 
+        string MEF = FixationTask.MEF;
+        path_to_data = FixationTask.path_to_data;
+
+        if (MEF == "ciuffa") { path_to_data = path_to_data + "MEF27/DATI/"; }
+        else if (MEF == "lisca") { path_to_data = path_to_data + "MEF28/DATI/"; }
+
+
         //activated = true;
         //possibili timestamps
-        
+
         starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
         addDataOneTime();
     }
@@ -106,8 +111,8 @@ public class Saver : MonoBehaviour
         PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStreamSaver.CenterLeftPupilPx[1]).ToString());
         PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStreamSaver.DiameterRight).ToString());
         PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStreamSaver.DiameterLeft).ToString());
-        PerFrameData[(PerFrameData.Count - 1)].Add((ARDUINOSaver.GetComponent<Ardu>().ax1).ToString());
-        PerFrameData[(PerFrameData.Count - 1)].Add((ARDUINOSaver.GetComponent<Ardu>().ax2).ToString()); 
+        PerFrameData[(PerFrameData.Count - 1)].Add((ARDUINO.GetComponent<Ardu>().ax1).ToString());
+        PerFrameData[(PerFrameData.Count - 1)].Add((ARDUINO.GetComponent<Ardu>().ax2).ToString()); 
 
     }
 
@@ -172,7 +177,7 @@ public class Saver : MonoBehaviour
                 SupplementData[(SupplementData.Count - 1)].Add(FixationTask.positions[i][0].ToString());
                 SupplementData[(SupplementData.Count - 1)].Add(FixationTask.positions[i][1].ToString());
                 SupplementData[(SupplementData.Count - 1)].Add(FixationTask.positions[i][2].ToString());
-                //SupplementData[(SupplementData.Count - 1)].Add(ARDUINOSaver.GetComponent<Ardu>().dead_zone.ToString());
+                //SupplementData[(SupplementData.Count - 1)].Add(ARDUINO.GetComponent<Ardu>().dead_zone.ToString());
                 SupplementData[(SupplementData.Count - 1)].Add(FixationTask.RewardLength.ToString());
                 SupplementData[(SupplementData.Count - 1)].Add(FixationTask.TargetSize[0].ToString());
                 SupplementData[(SupplementData.Count - 1)].Add(FixationTask.TargetSize[1].ToString());
@@ -253,13 +258,13 @@ public class Saver : MonoBehaviour
 
             DB.GetComponent<InteractWithDB>().AddRecording(new_ID, new_Date, new_Task, new_Param);
 
-            string filePath_PerFrameData = filePath + DateTime.Now.ToString("yyyy_MM_dd") + "_PerFrameData_ID" + new_ID.ToString() + ".csv";
-            string filePath_GameObjectData = filePath + DateTime.Now.ToString("yyyy_MM_dd") + "_GameObjectData_ID" + new_ID.ToString() + ".csv";
-            string filePath_SupplementData = filePath + DateTime.Now.ToString("yyyy_MM_dd") + "_SupplementData_ID" + new_ID.ToString() + ".csv";
+            string path_to_data_PerFrameData = path_to_data + DateTime.Now.ToString("yyyy_MM_dd") + "_PerFrameData_ID" + new_ID.ToString() + ".csv";
+            string path_to_data_GameObjectData = path_to_data + DateTime.Now.ToString("yyyy_MM_dd") + "_GameObjectData_ID" + new_ID.ToString() + ".csv";
+            string path_to_data_SupplementData = path_to_data + DateTime.Now.ToString("yyyy_MM_dd") + "_SupplementData_ID" + new_ID.ToString() + ".csv";
             
-            File.WriteAllText(filePath_PerFrameData, sb_PerFrame.ToString());
-            File.WriteAllText(filePath_GameObjectData, sb_GameObject.ToString());
-            File.WriteAllText(filePath_SupplementData, sb_Supplement.ToString());
+            File.WriteAllText(path_to_data_PerFrameData, sb_PerFrame.ToString());
+            File.WriteAllText(path_to_data_GameObjectData, sb_GameObject.ToString());
+            File.WriteAllText(path_to_data_SupplementData, sb_Supplement.ToString());
             Debug.Log("Saved all data");
         }
 

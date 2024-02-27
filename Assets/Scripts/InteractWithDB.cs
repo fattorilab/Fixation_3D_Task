@@ -5,26 +5,32 @@ using IDbConnection = System.Data.IDbConnection;
 using Mono.Data.Sqlite;
 using System;
 
-public class InteractWithDB: MonoBehaviour
+public class InteractWithDB : MonoBehaviour
 {
-    public string DBfilepath = "C:/Users/stefa/Documents/Unity Projects/Registrazioni VR/esperimentiVR.db"; 
-
     string conn;
     string sqlQuery;
     IDbConnection dbconn;
     IDbCommand dbcmd;
     IDataReader dbreader;
+    string path_to_data;
+    GameObject experiment;
 
     void Start()
     {
+        experiment = GameObject.Find("Experiment");
+        string MEF = experiment.GetComponent<FixationTask>().MEF;
+        path_to_data = experiment.GetComponent<FixationTask>().path_to_data;
+
+        if (MEF == "ciuffa") { path_to_data = path_to_data + "MEF27/esperimentiVR.db"; }
+        else if (MEF == "lisca") { path_to_data = path_to_data + "MEF28/esperimentiVR.db"; }
     }
 
     public int GetLastIDfromDB()
     {
         int lastID = -1; // Initialize lastID with a default value in case no records are found
 
-        Debug.Log("Connecting to DB " + $"DBfilepath={DBfilepath} for reading last ID");
-        conn = "URI=file:" + DBfilepath;
+        Debug.Log("Connecting to DB " + $"DB_filepath={path_to_data} for reading last ID");
+        conn = "URI=file:" + path_to_data;
 
         using (dbconn = new SqliteConnection(conn))
         {
@@ -55,15 +61,15 @@ public class InteractWithDB: MonoBehaviour
 
     public void AddRecording(int new_ID, string new_Date, string new_Task, string new_Param)
     {
-        Debug.Log("Connecting to DB " + $"DBfilepath={DBfilepath} to add new recording");
-        conn = "URI=file:" + DBfilepath;
+        Debug.Log("Connecting to DB " + $"DB_filepath={path_to_data} to add new recording");
+        conn = "URI=file:" + path_to_data;
 
         using (dbconn = new SqliteConnection(conn))
         {
             dbconn.Open();
 
             dbcmd = dbconn.CreateCommand();
-            sqlQuery = "INSERT INTO Recordings (ID, Date, Task, Param) VALUES ('" + new_ID + "','" +  new_Date + "','" + new_Task + "','" + new_Param + "')";
+            sqlQuery = "INSERT INTO Recordings (ID, Date, Task, Param) VALUES ('" + new_ID + "','" + new_Date + "','" + new_Task + "','" + new_Param + "')";
             dbcmd.CommandText = sqlQuery;
 
             dbcmd.ExecuteNonQuery();
