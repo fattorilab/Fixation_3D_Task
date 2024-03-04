@@ -1,61 +1,86 @@
-//using System.Collections;
-//using System.Collections.Generic;
 using UnityEngine;
-//using System.IO;
+using UnityEditor;
+using System;
+
 
 public class Ardu : MonoBehaviour
 {
     arduino ardu;
-    bool ardu_working = false;
-    public bool testing;
+    public bool ardu_working = false;
+    public bool testing = false;
     public string COM = "COM10";
-    //public string rewardTime = "500";
     public float ax1 = 0;
     public float ax2 = 0;
-    // Start is called before the first frame update
-
     public int reward_counter;
+
+    private bool ans = false;
     //public int dead_zone;
 
-    void Start()
+
+    void Start() 
     {
-        try
+        if (!testing)
         {
-            ardu = new arduino(COM, 57600, 80);
-            ardu_working = true;
+            try 
+            {
+                ardu = new arduino(COM, 57600, 80);
+                ardu_working = ardu.isWorkingCorrectly();
+            }
+            catch
+            {
+                ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino", 
+                    "Go ahead in testing mode (no arduino)", "Exit game");
+                // You can add a delay here if you want
+                if (ans) { testing = true; }
+                else { QuitGame(); }
+            }
         }
-        catch // (IOException ioex)
-        {
-            //Debug.Log($"{Time.frameCount}. exception: {ioex.Message}");
-            Debug.Log("Please connect all cables!");
-            ardu_working = false;
-        }
-        
     }
+
 
     // Update is called once per frame
     void Update()
     {
-        if (ardu_working)
+        if (!testing)
         {
-            ax1 = ardu.getX();
-            ax2 = -ardu.getY();
-            //Debug.Log("X " + ax1 + " Y " + ax2);
+            ardu_working = ardu.isWorkingCorrectly();
+            if (ardu_working)
+            {
+                ax1 = ardu.getX();
+                ax2 = -ardu.getY();
+            }
+            else
+            {
+                ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
+                                                        "Go ahead in testing mode (no arduino)", "Exit game");
+                // You can add a delay here if you want
+                if (ans) { testing = true; }
+                else { QuitGame(); }
+            }
         }
 
         if (Input.GetKey("escape"))
         {
-            if (ardu_working)
+            if (!testing && ardu_working)
             {
                 ardu.stopserial();
             }
-            Application.Quit();
+
+            QuitGame();
         }
+    }
+
+    public void QuitGame()
+    {
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+        Application.Quit();
     }
 
     public void SendReward(int rewardTime)
     {
-        if (ardu_working && !testing)
+        if (ardu_working )
         {
             ardu.sendSerial("R" + rewardTime.ToString());
            
@@ -64,7 +89,7 @@ public class Ardu : MonoBehaviour
         reward_counter += 1;
     }
 
-    // TRIGGER 1 BNC 8(T1)
+    // TRIGGER 1 BNC 
     public void SendStartRecordingOE()
     {
         if (ardu_working && !testing)
@@ -73,7 +98,7 @@ public class Ardu : MonoBehaviour
             Debug.Log("REC OE ON");
         }
     }
-    // TRIGGER 1 BNC 8(T1)
+    // TRIGGER 1 BNC
     public void SendStopRecordingOE()
     {
         if (ardu_working && !testing)

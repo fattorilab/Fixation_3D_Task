@@ -18,8 +18,8 @@ public class InteractWithDB : MonoBehaviour
     void Start()
     {
         experiment = GameObject.Find("Experiment");
-        string MEF = experiment.GetComponent<FixationTask>().MEF;
-        path_to_data = experiment.GetComponent<FixationTask>().path_to_data;
+        string MEF = experiment.GetComponent<MainTask>().MEF;
+        path_to_data = experiment.GetComponent<MainTask>().path_to_data;
 
         if (MEF == "ciuffa") { path_to_data = path_to_data + "MEF27/esperimentiVR.db"; }
         else if (MEF == "lisca") { path_to_data = path_to_data + "MEF28/esperimentiVR.db"; }

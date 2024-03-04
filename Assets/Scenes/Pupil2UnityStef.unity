@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -279,55 +279,6 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
   m_PVRTiledBaking: 0
---- !u!1 &337625866
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 337625868}
-  - component: {fileID: 337625867}
-  m_Layer: 0
-  m_Name: ARDUINO
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
---- !u!114 &337625867
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337625866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72e374c606dbd68468b87983118d9d24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  testing: 0
-  COM: COM10
-  ax1: 0
-  ax2: 0
-  reward_counter: 0
---- !u!4 &337625868
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337625866}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.75154, y: -0.13853168, z: 9.870495}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &557864361
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,8 +589,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1845965409}
-  - component: {fileID: 1845965410}
+  - component: {fileID: 1845965413}
   - component: {fileID: 1845965411}
+  - component: {fileID: 1845965412}
   m_Layer: 0
   m_Name: Experiment
   m_TagString: MainCamera
@@ -662,58 +614,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1845965410
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1845965406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d7e19f1a4d71a64a955af36b438ba3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PupilDataStreamScript: {fileID: 0}
-  Player: {fileID: 1892022161}
-  MEF: lisca
-  path_to_data: C:/Users/admin/Desktop/Registrazioni_VR/
-  file_name_positions: Target_positions_1
-  TargetPrefab: {fileID: 3851015196746089718, guid: 68374d10ef5a33c41bbee17c1998edc5, type: 3}
-  TargetCurrentPosition: {x: 0, y: 0, z: 0}
-  TargetCurrentLabel: 0
-  TargetSize: {x: 0.2, y: 0.2, z: 0.2}
-  positions: []
-  target_label: 
-  BLACK_timing:
-  - 0.3
-  - 0.6
-  - 0.9
-  GREEN_timing:
-  - 1
-  - 1.2
-  - 1.5
-  RED_timing:
-  - 1
-  frame_number: 0
-  state: 0
-  last_state: 0
-  error_state: 0
-  trials_tot: 0
-  trials_win: 0
-  trials_lose: 0
-  trials_for_target: 
-  ripetition_for_target: 20
-  first: 0
-  arduscript: {fileID: 337625867}
-  arduX: 0
-  arduY: 0
-  RewardLength: 100
-  centerRightPupilPx: {x: 0, y: 0}
-  centerLeftPupilPx: {x: 0, y: 0}
-  diameterRight: 0
-  diameterLeft: 0
-  pupilconnection: 0
 --- !u!114 &1845965411
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -721,7 +621,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1845965406}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdea2ff5ef964504287307a71db463fa, type: 3}
   m_Name: 
@@ -731,6 +631,78 @@ MonoBehaviour:
   PupilDataStreamSaver: {fileID: 0}
   path_to_data: 
   Want2Save: 1
+--- !u!114 &1845965412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1845965406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72e374c606dbd68468b87983118d9d24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ardu_working: 0
+  testing: 0
+  COM: COM10
+  ax1: 0
+  ax2: 0
+  reward_counter: 0
+--- !u!114 &1845965413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1845965406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aabfe54c959a8e46b88e8dabb7899ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PupilDataStreamScript: {fileID: 0}
+  Player: {fileID: 0}
+  MEF: 
+  path_to_data: C:/Users/admin/Desktop/Registrazioni_VR/
+  SAVE_CSV: 0
+  RECORD_VIDEO_MAIN: 0
+  RECORD_VIDEO_LR: 0
+  RewardLength: 20
+  current_state: 0
+  last_state: 0
+  error_state: 
+  current_trial: 0
+  trials_win: 0
+  trials_lose: 0
+  trials_for_target: 
+  trials_for_cond: 2
+  file_name_positions: Target_positions_3
+  TargetPrefab: {fileID: 3851015196746089718, guid: 68374d10ef5a33c41bbee17c1998edc5, type: 3}
+  TargetCurrentPosition: {x: 0, y: 0, z: 0}
+  current_condition: 0
+  TargetSize: {x: 1, y: 1, z: 1}
+  target_positions: []
+  target_label: 
+  condition_list: 
+  FREE_timing:
+  - 0.3
+  - 0.6
+  - 0.9
+  DELAY_timing:
+  - 1
+  RT_timing:
+  - 1
+  ardu: {fileID: 1845965412}
+  arduX: 0
+  arduY: 0
+  centerRightPupilPx: {x: NaN, y: NaN}
+  centerLeftPupilPx: {x: NaN, y: NaN}
+  diameterRight: NaN
+  diameterLeft: NaN
+  pupilconnection: 0
+  first: 0
+  frame_number: 0
 --- !u!1 &1892022161
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,7 +824,7 @@ MonoBehaviour:
     PORT: 50020
     IPHeader: 
   retryConnectDelay: 5
-  connectOnEnable: 1
+  connectOnEnable: 0
   isConnecting: 0
   PupilVersion: 
 --- !u!4 &2033775846
@@ -868,5 +840,5 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
