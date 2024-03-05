@@ -29,17 +29,17 @@ public class MainTask : MonoBehaviour
     public string MEF;
     public string path_to_data = "C:/Users/admin/Desktop/Registrazioni_VR/";
     public bool SAVE_CSV = false;
-    public bool RECORD_VIDEO_MAIN = false;
-    public bool RECORD_VIDEO_LR = false;
+    public bool RECORD_VIDEO = false;
     [HideInInspector] public long starttime = 0;
 
     [Header("Reward")]
-    public int RewardLength = 20;
+    public int RewardLength = 50;
     public int reward_counter = 0; //just for having this information readibily accessible
+    float RewardLength_in_sec; //Only for format reasons
 
     [Header("Trials Info")]
     public int current_state;
-    public int last_state;
+    private int last_state;
     public string error_state;
     public int current_trial;
     public int trials_win;
@@ -52,7 +52,7 @@ public class MainTask : MonoBehaviour
     public string file_name_positions;
     public GameObject TargetPrefab; GameObject Target; // qui ci andra il prefab
     public Vector3 TargetCurrentPosition;
-    public int current_condition;
+    [HideInInspector] public int current_condition;
     public Vector3 TargetSize;
 
     public List<Vector3> target_positions = new List<Vector3>(); //defining a list because is chaning size during the runtime
@@ -66,9 +66,9 @@ public class MainTask : MonoBehaviour
     public float[] DELAY_timing = { 0.3f, 0.6f, 0.9f };
     public float[] RT_timing = { 0.3f, 0.6f, 0.9f };
 
-    public List<int> FREE_timing_list;
-    public List<int> DELAY_timing_list;
-    public List<int> RT_timing_list;
+    private List<int> FREE_timing_list;
+    private List<int> DELAY_timing_list;
+    private List<int> RT_timing_list;
 
     private float FREE_duration;
     private float DELAY_duration;
@@ -91,8 +91,8 @@ public class MainTask : MonoBehaviour
     private float lastevent;
     private string identifier;
     private bool isMoving = false;
-    [HideInInspector] public bool first;
-    [HideInInspector] public int frame_number = 0;
+    private bool first;
+    private int frame_number = 0;
 
     #endregion
 
@@ -107,11 +107,12 @@ public class MainTask : MonoBehaviour
         current_trial = 0;
         trials_win = 0;
         trials_lose = 0;
+        RewardLength_in_sec = RewardLength / 1000f;
         first = true;
         System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
         starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds(); 
 
-        ardu = GetComponent<Ardu>(); // Assumi che l'oggetto Joystick abbia il nome "Joystick"
+        ardu = GetComponent<Ardu>(); 
 
 
         //  serve ancora??
@@ -196,17 +197,57 @@ public class MainTask : MonoBehaviour
             case 0: //INTERTRIAL
                 if (last_state != current_state) //StateBeginning //State beginning (executed once each time the system enter the state)
                 {
+                    current_condition = -1;
+
+                    lastevent = Time.time;
                     last_state = current_state;
                     error_state = "";
                 }
 
                 //StateBody //State body (executed every frame the system is in the state)
                 ////////////////////////////////////////////////////
+                current_condition = -1;
 
+                if (((Time.time - lastevent) >= RewardLength_in_sec) && !isMoving)   //StateEnd //State end (executed once each time the system exit the state)
+                {   
+                    // Prepare everything for next trial
 
-                if (!isMoving)   //StateEnd //State end (executed once each time the system exit the state)
-                {
+                    // Choose and instantiate the target
+                    current_condition = condition_list[0];
+                    TargetCurrentPosition = target_positions[current_condition];
+                    Target = Instantiate(TargetPrefab, TargetCurrentPosition, TargetPrefab.transform.rotation);
+                    Target.transform.localScale = TargetSize;
+                    Target.GetComponent<MeshRenderer>().enabled = false; //instantiate the target (not visible)
+                                                     //OLD MANNER        //randomIndex = UnityEngine.Random.Range(0, target_label.Count);
+                                                                         //current_condition = target_label[randomIndex];
+
+                    // Add target to data to be saved
+                    identifier = "Target" + current_condition.ToString();
+
+                    GetComponent<Saver>().addObject(identifier,
+                        "Target",
+                        Target.transform.position.x,
+                        Target.transform.position.y,
+                        Target.transform.position.z,
+                        TargetPrefab.transform.rotation[0],
+                        TargetPrefab.transform.rotation[1],
+                        TargetPrefab.transform.rotation[2],
+                        TargetSize[0],
+                        TargetSize[1],
+                        TargetSize[2]);
+
+                    // Choose the random times
+                    // OLD MANNER // set_epochs_duration();
+
+                    // Picking first time from the timing list to select epoch durations in this trial
+                    FREE_duration = FREE_timing[FREE_timing_list[0]];
+                    DELAY_duration = DELAY_timing[DELAY_timing_list[0]];
+                    RT_duration = RT_timing[RT_timing_list[0]];
+
                     current_state = 1;
+
+                    //the trial is starting
+                    current_trial++;
                 }
 
                 break;
@@ -216,38 +257,6 @@ public class MainTask : MonoBehaviour
             case 1: //FREE
                 if (last_state != current_state) //StateBeginning
                 {
-                    // Choose and instantiate the target
-                    //randomIndex = UnityEngine.Random.Range(0, target_label.Count);
-                    //current_condition = target_label[randomIndex];
-                    current_condition = condition_list[0];
-                    TargetCurrentPosition = target_positions[current_condition];
-                    Target = Instantiate(TargetPrefab, TargetCurrentPosition, TargetPrefab.transform.rotation);
-                    Target.transform.localScale = TargetSize;
-                    Target.GetComponent<MeshRenderer>().enabled = false; //instantiate the target (not visible)
-
-                    // Add target to data to be saved
-                    identifier = "Target" + current_condition.ToString();
-                    GetComponent<Saver>().addObject(identifier,
-                        Target.transform.localPosition.x,
-                        Target.transform.localPosition.y,
-                        Target.transform.localPosition.z,
-                        Target.transform.localScale.x,
-                        Target.transform.localScale.y,
-                        Target.transform.localScale.z,
-                        Target.transform.localRotation.x,
-                        Target.transform.localRotation.y,
-                        Target.transform.localRotation.z);
-
-                    // Choose the random times
-                    //set_epochs_duration();
-
-                    // Picking first time from the timing list to select epoch durations in this trial
-                    FREE_duration = FREE_timing[FREE_timing_list[0]];
-                    DELAY_duration = DELAY_timing[DELAY_timing_list[0]];
-                    RT_duration = RT_timing[RT_timing_list[0]];
-
-                    //the trial is starting
-                    current_trial++;
 
                     //Beginning routine
                     lastevent = Time.time;
@@ -337,6 +346,7 @@ public class MainTask : MonoBehaviour
                 if (last_state != current_state) //StateBeginning
                 {
                     Debug.Log(error_state);
+                    GetComponent<Saver>().addObjectEnd(identifier);
                     reset_lose();
 
                     //Beginning routine
@@ -351,6 +361,7 @@ public class MainTask : MonoBehaviour
                 if (true)   //StateEnd 
                 {
                     current_state = 0;
+                    error_state = "";
                 }
 
                 break;
@@ -361,6 +372,7 @@ public class MainTask : MonoBehaviour
                 if (last_state != current_state) //StateBeginning
                 {
                     Debug.Log("TRIAL DONE");
+                    GetComponent<Saver>().addObjectEnd(identifier);
                     reset_win();
 
                     //Beginning routine
@@ -405,7 +417,6 @@ public class MainTask : MonoBehaviour
     void reset_win()
     {
         ardu.SendReward(RewardLength);
-        GetComponent<Saver>().addObjectEnd(identifier);
         Destroy(Target);
 
         current_state = 0;
@@ -422,7 +433,6 @@ public class MainTask : MonoBehaviour
 
     void reset_lose()
     {
-        GetComponent<Saver>().addObjectEnd(identifier);
         Destroy(Target);
 
         condition_list = SwapVector(condition_list);
@@ -447,7 +457,7 @@ public class MainTask : MonoBehaviour
         #endif
     }
 
-    public List<int> CreateRandomSequence(int n, int k)
+    public List<int> CreateRandomSequence(int n, int k) //n, number of elements; k, length of the required vector
     {
         var vector = new List<int>();
         for (int i = 0; i < Math.Floor((double)k / n) + 1; i++)
