@@ -9,8 +9,8 @@ public class Ardu : MonoBehaviour
     public bool ardu_working = false;
     public bool testing = false;
     public string COM = "COM10";
-    public float ax1 = 0;
-    public float ax2 = 0;
+    public float ax1 = float.NaN;
+    public float ax2 = float.NaN;
     public int reward_counter;
 
     private bool ans = false;
@@ -24,7 +24,6 @@ public class Ardu : MonoBehaviour
             try 
             {
                 ardu = new arduino(COM, 57600, 80);
-                ardu_working = ardu.isWorkingCorrectly();
             }
             catch
             {
@@ -42,14 +41,24 @@ public class Ardu : MonoBehaviour
     void Update()
     {
         if (!testing)
-        {
-            ardu_working = ardu.isWorkingCorrectly();
-            if (ardu_working)
+        {   
+            try
             {
-                ax1 = ardu.getX();
-                ax2 = -ardu.getY();
+                if (ardu.isWorkingCorrectly())
+                {
+                    ax1 = ardu.getX();
+                    ax2 = -ardu.getY();
+                }
+                else
+                {
+                    ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
+                                        "Go ahead in testing mode (no arduino)", "Exit game");
+                    // You can add a delay here if you want
+                    if (ans) { testing = true; }
+                    else { QuitGame(); }
+                }
             }
-            else
+            catch // something went wrong (maybe arduino disconnected?)
             {
                 ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
                                                         "Go ahead in testing mode (no arduino)", "Exit game");
@@ -57,6 +66,11 @@ public class Ardu : MonoBehaviour
                 if (ans) { testing = true; }
                 else { QuitGame(); }
             }
+        }
+        else
+        {
+            ax1 = float.NaN;
+            ax2 = float.NaN;
         }
 
         if (Input.GetKey("escape"))
@@ -68,6 +82,8 @@ public class Ardu : MonoBehaviour
 
             QuitGame();
         }
+
+
     }
 
     public void QuitGame()

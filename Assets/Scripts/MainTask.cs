@@ -16,6 +16,8 @@ public class MainTask : MonoBehaviour
 {
     #region Variables Declaration
 
+    public float pippo;
+
     [SerializeField]
 
     [HideInInspector]
@@ -28,8 +30,6 @@ public class MainTask : MonoBehaviour
     [Header("Saving info")]
     public string MEF;
     public string path_to_data = "C:/Users/admin/Desktop/Registrazioni_VR/";
-    public bool SAVE_CSV = false;
-    public bool RECORD_VIDEO = false;
     [HideInInspector] public long starttime = 0;
 
     [Header("Reward")]
@@ -38,18 +38,19 @@ public class MainTask : MonoBehaviour
     float RewardLength_in_sec; //Only for format reasons
 
     [Header("Trials Info")]
+    public string file_name_positions;
+    public int trials_for_cond;
     public int current_state;
     private int last_state;
-    public string error_state;
+    [HideInInspector] public string error_state;
     public int current_trial;
     public int trials_win;
     public int trials_lose;
     public int[] trials_for_target;
-    public int trials_for_cond;
+
 
     [Header("Target Info")]
     [HideInInspector] public int seed = 12345;
-    public string file_name_positions;
     public GameObject TargetPrefab; GameObject Target; // qui ci andra il prefab
     public Vector3 TargetCurrentPosition;
     [HideInInspector] public int current_condition;
@@ -77,8 +78,8 @@ public class MainTask : MonoBehaviour
 
     [Header("Arduino Info")]
     public Ardu ardu;
-    public float arduX = 0;
-    public float arduY = 0;
+    public float arduX;
+    public float arduY;
     //public int dead_zone;
       
     [Header("PupilLab Info")]
@@ -91,8 +92,8 @@ public class MainTask : MonoBehaviour
     private float lastevent;
     private string identifier;
     private bool isMoving = false;
-    private bool first;
-    private int frame_number = 0;
+    private bool first_frame;
+    [HideInInspector] public int frame_number = 0;
 
     #endregion
 
@@ -108,19 +109,16 @@ public class MainTask : MonoBehaviour
         trials_win = 0;
         trials_lose = 0;
         RewardLength_in_sec = RewardLength / 1000f;
-        first = true;
+        first_frame = true;
         System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
-        starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds(); 
+
 
         ardu = GetComponent<Ardu>(); 
 
 
         //  serve ancora??
         Player = GameObject.Find("Player");
-        foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
-        {
-        cam.backgroundColor = Color.white;
-        }
+
         
 
         /*
@@ -170,23 +168,26 @@ public class MainTask : MonoBehaviour
         */
 
         frame_number++;
-        arduX = ardu.ax1;
+        arduX = ardu.ax1;   //note: if arduino is not connected (or not working) the arduX,Y = NaN;
         arduY = ardu.ax2;
-        
 
-        if (arduX == 0 && arduY == 0) { isMoving = false; } else { isMoving = true; }
-
-
-        if (first) // first operating frame 
+        if ((!float.IsNaN(arduX) && arduX != 0) || (!float.IsNaN(arduY) && arduY != 0) || Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0) //if arduX is nan, I cannot compare it with 0
         {
-            foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
-            {
-                cam.backgroundColor = Color.black;
-            }
+            isMoving = true;
+        }
+        else
+        {
+            isMoving = false;
+        }
 
+
+
+        if (first_frame) // first operating frame 
+        {
             Debug.Log("START TASK");
+            starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds(); //start time main task unity
             ardu.SendStartRecordingOE();             // Send START trigger
-            first = false;
+            first_frame = false;
         }
 
 
@@ -197,6 +198,12 @@ public class MainTask : MonoBehaviour
             case 0: //INTERTRIAL
                 if (last_state != current_state) //StateBeginning //State beginning (executed once each time the system enter the state)
                 {
+
+                    foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
+                    {
+                        cam.backgroundColor = Color.white;
+                    }
+
                     current_condition = -1;
 
                     lastevent = Time.time;
@@ -221,20 +228,7 @@ public class MainTask : MonoBehaviour
                                                      //OLD MANNER        //randomIndex = UnityEngine.Random.Range(0, target_label.Count);
                                                                          //current_condition = target_label[randomIndex];
 
-                    // Add target to data to be saved
-                    identifier = "Target" + current_condition.ToString();
 
-                    GetComponent<Saver>().addObject(identifier,
-                        "Target",
-                        Target.transform.position.x,
-                        Target.transform.position.y,
-                        Target.transform.position.z,
-                        TargetPrefab.transform.rotation[0],
-                        TargetPrefab.transform.rotation[1],
-                        TargetPrefab.transform.rotation[2],
-                        TargetSize[0],
-                        TargetSize[1],
-                        TargetSize[2]);
 
                     // Choose the random times
                     // OLD MANNER // set_epochs_duration();
@@ -248,6 +242,11 @@ public class MainTask : MonoBehaviour
 
                     //the trial is starting
                     current_trial++;
+
+                    foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
+                    {
+                        cam.backgroundColor = Color.black;
+                    }
                 }
 
                 break;
@@ -290,6 +289,21 @@ public class MainTask : MonoBehaviour
                     Target.GetComponent<MeshRenderer>().enabled = true;
                     Target.GetComponent<MeshRenderer>().material.color = Color.green;
 
+                    // Add target to data to be saved
+                    identifier = "Target" + current_condition.ToString();
+
+                    GetComponent<Saver>().addObject(identifier,
+                        "Target",
+                        Target.transform.position.x,
+                        Target.transform.position.y,
+                        Target.transform.position.z,
+                        TargetPrefab.transform.rotation[0],
+                        TargetPrefab.transform.rotation[1],
+                        TargetPrefab.transform.rotation[2],
+                        TargetSize[0],
+                        TargetSize[1],
+                        TargetSize[2]);
+
                     //Beginning routine
                     lastevent = Time.time;
                     last_state = current_state;
@@ -326,7 +340,7 @@ public class MainTask : MonoBehaviour
                 }
 
                 //StateBody ////////////////////////////////////////
-                if (isMoving || Input.GetKeyDown(KeyCode.Return)) //Enter for debugging
+                if (isMoving) 
                 {
                     current_state = 99;
                 }
@@ -442,7 +456,7 @@ public class MainTask : MonoBehaviour
 
         current_state = 0;
         lastevent = Time.time;
-        trials_lose = current_trial - trials_win;
+        trials_lose++;
     }
 
     public void QuitGame()
