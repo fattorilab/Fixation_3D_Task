@@ -21,7 +21,8 @@ public class MainTask : MonoBehaviour
     [SerializeField]
 
     [HideInInspector]
-    [Header("Collegamenti")]
+    // Variable to hook this main_script onto the script 'PupilDataScript' that takes pupil data and the variable to understand if Pupil Lab is connected or not
+    [Header("Collegamenti")] 
     public PupilDataStream PupilDataStreamScript;
     private RequestController RequestControllerScript;
     private bool PupilDataConnessionStatus;
@@ -29,7 +30,7 @@ public class MainTask : MonoBehaviour
 
     [Header("Saving info")]
     public string MEF;
-    public string path_to_data = "C:/Users/admin/Desktop/Registrazioni_VR/";
+    public string path_to_data = "C:/Users/stefa/Documents/LABORATORIO SIMULATO/Registrazioni_VR/";
     [HideInInspector] public long starttime = 0;
 
     [Header("Reward")]
@@ -38,39 +39,40 @@ public class MainTask : MonoBehaviour
     float RewardLength_in_sec; //Only for format reasons
 
     [Header("Trials Info")]
-    public string file_name_positions;
-    public int trials_for_cond;
-    public int current_state;
-    private int last_state;
-    [HideInInspector] public string error_state;
-    public int current_trial;
-    public int trials_win;
-    public int trials_lose;
-    public int[] trials_for_target;
+    public string file_name_positions; // stringa con il nome del file csv che deve essere in \Assets
+    public int trials_for_cond;  // numero di trial per condition
+    public int current_state;   // stato corrente della tasc
+    private int last_state;     // ultimo stato prima del corrente
+    [HideInInspector] public string error_state;    
+    public int current_trial;  //numero trial attuale
+    public int trials_win;    //totale trial vinti
+    public int trials_lose;   //totale trial persi
+    public int[] trials_for_target;  // lista che conta i trial giusti fatti per target
 
-
+    // variables for managing the ball GameObject, taken each time from a prefab
     [Header("Target Info")]
-    [HideInInspector] public int seed = 12345;
-    public GameObject TargetPrefab; GameObject Target; // qui ci andra il prefab
-    public Vector3 TargetCurrentPosition;
-    [HideInInspector] public int current_condition;
-    public Vector3 TargetSize;
+    [HideInInspector] public int seed = 12345;      //rabdomizza                                                                                    // che roba è??????????
+    public GameObject TargetPrefab; GameObject Target; // put here the prefab
+    public Vector3 TargetCurrentPosition; // vettore in cui cadrà le coordinate del target scelto in maniera randomica 
+    [HideInInspector] public int current_condition;     // target attuale                                                                GIUSTO FRA_EDO?
+    public Vector3 TargetSize; // target dimensions
 
     public List<Vector3> target_positions = new List<Vector3>(); //defining a list because is chaning size during the runtime
-    // [HideInInspector] public List<int> target_label;
+    // [HideInInspector] public List<int> target_label;  // label del target associato al randomIndex;                                            QUESTO è STATO ELIMINATO? GIUSTO FRA_EDO?
     private int randomIndex;
     public List<int> condition_list;
 
+    // variabili per la gestione  delle tempistiche delle epoche
     [Header("Epoches Info")]
 
     public float[] FREE_timing = { 0.3f, 0.6f, 0.9f }; //defining an array because is not chaning size during the runtime
     public float[] DELAY_timing = { 0.3f, 0.6f, 0.9f };
     public float[] RT_timing = { 0.3f, 0.6f, 0.9f };
-
+    // liste con le squenze randomiche scelte in sequenza                                                                                      
     private List<int> FREE_timing_list;
     private List<int> DELAY_timing_list;
     private List<int> RT_timing_list;
-
+    // qui ci andara a finire la durata scelta per quel trial presa dalle liste sopra                                                            
     private float FREE_duration;
     private float DELAY_duration;
     private float RT_duration;
@@ -83,16 +85,17 @@ public class MainTask : MonoBehaviour
     //public int dead_zone;
       
     [Header("PupilLab Info")]
-    public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);
-    public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);
-    public float diameterRight = float.NaN;
-    public float diameterLeft = float.NaN;
-    public bool pupilconnection;
+    public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);  //pixel pupilla destra
+    public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);   //pixel pupilla sinistra
+    public float diameterRight = float.NaN;                  //pupil dianmeter destra
+    public float diameterLeft = float.NaN;                   //pupil dianmeter sinistro
 
-    private float lastevent;
+    //public bool pupilconnection;
+
+    private float lastevent;                             // questa variabile mi serve per capire quanto passa tra un evento e l'altro                
     private string identifier;
     private bool isMoving = false;
-    private bool first_frame;
+    private bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
     [HideInInspector] public int frame_number = 0;
 
     #endregion
@@ -121,11 +124,11 @@ public class MainTask : MonoBehaviour
 
         
 
-        /*
-        PupilDataStreamScript = GameObject.Find("PupilDataManagment").GetComponent<PupilDataStream>();
-        RequestControllerScript = GameObject.Find("PupilDataManagment").GetComponent<RequestController>();
-        RequestControllerScript.connectOnEnable = pupilconnection;
-        */
+        
+        PupilDataStreamScript = GameObject.Find("PupilDataManagment").GetComponent<PupilDataStream>();        // mi collego allo script PupilDAtaManagment da cui prendo lo stream dei dati
+        RequestControllerScript = GameObject.Find("PupilDataManagment").GetComponent<RequestController>();    // mi collego allo script PupilDAtaManagment da cui prendo la richiesta di controllo per unity
+     
+        
 
        
         LoadPositionsFromCSV();     //import target_positions from csv file
@@ -146,33 +149,32 @@ public class MainTask : MonoBehaviour
         FREE_timing_list = CreateRandomSequence(FREE_timing.Length, trials_for_cond * target_positions.Count);
         DELAY_timing_list = CreateRandomSequence(DELAY_timing.Length, trials_for_cond * target_positions.Count);
         RT_timing_list = CreateRandomSequence(RT_timing.Length, trials_for_cond * target_positions.Count);
-
-
     }
 
     void Update()
     {
+        // serve ancora ?
+       // PupilDataConnessionStatus = PupilDataStreamScript.subsCtrl.IsConnected;  //verifico la connessione
 
-        /* serve ancora ?
-        PupilDataConnessionStatus = PupilDataStreamScript.subsCtrl.IsConnected;
-
-        if (PupilDataConnessionStatus)
-        {
-            //Debug.Log((centerRightPupilPx[0]).ToString());
-            centerRightPupilPx = PupilDataStreamScript.CenterRightPupilPx;
-            centerLeftPupilPx = PupilDataStreamScript.CenterLeftPupilPx;
-            diameterRight = PupilDataStreamScript.DiameterRight;
-            diameterLeft = PupilDataStreamScript.DiameterLeft;
-            ardu.SendPupilLabData(centerRightPupilPx[0], centerRightPupilPx[1], centerLeftPupilPx[0], centerLeftPupilPx[1]);
-        }
-        */
+        //if (PupilDataConnessionStatus)     // se si  connesso comincia a ciucciare i dati 
+        //{
+        //    //Debug.Log((centerRightPupilPx[0]).ToString());
+        //    centerRightPupilPx = PupilDataStreamScript.CenterRightPupilPx;
+        //    centerLeftPupilPx = PupilDataStreamScript.CenterLeftPupilPx;
+        //    diameterRight = PupilDataStreamScript.DiameterRight;
+        //    diameterLeft = PupilDataStreamScript.DiameterLeft;
+        //    ardu.SendPupilLabData(centerRightPupilPx[0], centerRightPupilPx[1], centerLeftPupilPx[0], centerLeftPupilPx[1]); // e li mando a arduino
+        //}
+        // else di controlllo sulla connessione
+        
 
         frame_number++;
         arduX = ardu.ax1;   //note: if arduino is not connected (or not working) the arduX,Y = NaN;
         arduY = ardu.ax2;
 
-        if ((!float.IsNaN(arduX) && arduX != 0) || (!float.IsNaN(arduY) && arduY != 0) || Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0) //if arduX is nan, I cannot compare it with 0
+        if ((!float.IsNaN(arduX) && arduX != 0) || (!float.IsNaN(arduY) && arduY != 0) || Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0 ) //if arduX is nan, I cannot compare it with 0
         {
+            
             isMoving = true;
         }
         else
@@ -188,8 +190,10 @@ public class MainTask : MonoBehaviour
             starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds(); //start time main task unity
             ardu.SendStartRecordingOE();             // Send START trigger
             first_frame = false;
+            
         }
 
+        
 
         #region StateMachine
  
@@ -214,8 +218,8 @@ public class MainTask : MonoBehaviour
                 //StateBody //State body (executed every frame the system is in the state)
                 ////////////////////////////////////////////////////
                 current_condition = -1;
-
-                if (((Time.time - lastevent) >= RewardLength_in_sec) && !isMoving)   //StateEnd //State end (executed once each time the system exit the state)
+               
+                if (((Time.time - lastevent) >= RewardLength_in_sec) && !isMoving && (PupilDataStreamScript.subsCtrl.IsConnected || RequestControllerScript.ans))   //StateEnd //State end (executed once each time the system exit the state)
                 {   
                     // Prepare everything for next trial
 
@@ -256,13 +260,11 @@ public class MainTask : MonoBehaviour
             case 1: //FREE
                 if (last_state != current_state) //StateBeginning
                 {
-
                     //Beginning routine
                     lastevent = Time.time;
                     last_state = current_state;
                     error_state = "";
                 }
-
 
                 //StateBody ////////////////////////////////////////
                 if (isMoving)

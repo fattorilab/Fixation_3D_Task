@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -621,16 +621,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1845965406}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdea2ff5ef964504287307a71db463fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  starttime: 0
-  ARDUINO: {fileID: 0}
-  PupilDataStreamSaver: {fileID: 0}
+  frame_counter: 0
   path_to_data: 
-  Want2Save: 1
+  lastIDFromDB: 0
+  PupilData: {fileID: 0}
 --- !u!114 &1845965412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -661,29 +660,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aabfe54c959a8e46b88e8dabb7899ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pippo: 0
   PupilDataStreamScript: {fileID: 0}
   Player: {fileID: 0}
-  MEF: 
-  path_to_data: C:/Users/admin/Desktop/Registrazioni_VR/
-  SAVE_CSV: 0
-  RECORD_VIDEO_MAIN: 0
-  RECORD_VIDEO_LR: 0
+  MEF: lisca
+  path_to_data: C:/Users/stefa/Documents/LABORATORIO SIMULATO/Registrazioni_VR/
+  starttime: 0
   RewardLength: 20
+  reward_counter: 0
+  file_name_positions: Target_positions_3
+  trials_for_cond: 2
   current_state: 0
-  last_state: 0
   error_state: 
   current_trial: 0
   trials_win: 0
   trials_lose: 0
   trials_for_target: 
-  trials_for_cond: 2
-  file_name_positions: Target_positions_3
+  seed: 12345
   TargetPrefab: {fileID: 3851015196746089718, guid: 68374d10ef5a33c41bbee17c1998edc5, type: 3}
   TargetCurrentPosition: {x: 0, y: 0, z: 0}
   current_condition: 0
   TargetSize: {x: 1, y: 1, z: 1}
   target_positions: []
-  target_label: 
   condition_list: 
   FREE_timing:
   - 0.3
@@ -700,8 +698,6 @@ MonoBehaviour:
   centerLeftPupilPx: {x: NaN, y: NaN}
   diameterRight: NaN
   diameterLeft: NaN
-  pupilconnection: 0
-  first: 0
   frame_number: 0
 --- !u!1 &1892022161
 GameObject:
@@ -824,7 +820,7 @@ MonoBehaviour:
     PORT: 50020
     IPHeader: 
   retryConnectDelay: 5
-  connectOnEnable: 0
+  connectOnEnable: 1
   isConnecting: 0
   PupilVersion: 
 --- !u!4 &2033775846

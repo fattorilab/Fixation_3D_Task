@@ -55,13 +55,14 @@ public class Saver : MonoBehaviour
         #region Choose Monkey and set path
 
         experiment = GameObject.Find("Experiment");
+        DB = GameObject.Find("DB");
         string MEF = experiment.GetComponent<MainTask>().MEF;
         path_to_data = experiment.GetComponent<MainTask>().path_to_data;
         if (MEF.ToLower() == "ciuffa") { path_to_data = Path.Combine(path_to_data, "MEF27"); }
         else if (MEF.ToLower() == "lisca") { path_to_data = Path.Combine(path_to_data, "MEF28"); }
         else 
         {
-            bool ans = EditorUtility.DisplayDialog("Wrong MEF name", "Unable to find the monkey" + MEF, //don't know how to put a simple popup here (the choice is irrelevant)
+            bool ans1 = EditorUtility.DisplayDialog("Wrong MEF name", "Unable to find the monkey" + MEF, //don't know how to put a simple popup here (the choice is irrelevant)
                             "Close and check MEF in MainTask", "Close and check MEF in MainTask");
             QuitGame();     
         }
@@ -72,9 +73,8 @@ public class Saver : MonoBehaviour
         }
         catch
         {
-            bool ans = EditorUtility.DisplayDialog("Cannot interact with DB", "It is not possible to read last ID from database. You may not to be able to save data",
-                            "Close and check DB", "Proceed anyway");
-            if (ans) { QuitGame(); }  
+            bool ans2 = EditorUtility.DisplayDialog("Cannot interact with DB", "It is not possible to read last ID from database. You may not to be able to save data","Close and check DB", "Proceed anyway");
+            if (ans2) { QuitGame(); }  
         }
             
 

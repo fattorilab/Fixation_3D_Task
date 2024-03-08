@@ -14,6 +14,7 @@ namespace PupilLabs
     {
         [SerializeField][HideInInspector]
         private Request request;
+        public bool ans = false;
 
         [Header("Settings")]
       
@@ -47,7 +48,7 @@ namespace PupilLabs
 
         [SerializeField][HideInInspector]
         private string PupilVersion;
-
+        
         public string GetSubConnectionString()
         {
             return request.GetSubConnectionString();
@@ -129,17 +130,23 @@ namespace PupilLabs
                 if (!request.IsConnected)
                 {
                     request.Close();
-
+                    
                     if (retry)
-                    {
+                    {   
                         Debug.LogWarning("Could not connect, Re-trying in 5 seconds! ");
+                        ans = EditorUtility.DisplayDialog("PupilLabs Connection Error", "Unable to connect correctly to PupilLabs", 
+                        "Go ahead without PupilLabs (no eyedata)", "Exit game");
+                        // You can add a delay here if you want
+                        if (ans) { Debug.LogWarning("Could not connect! ");
+                        yield break; }
+                        else { QuitGame(); }
                         yield return new WaitForSeconds(retryConnectDelay);
                     }
-                    else
+                    /*else
                     {
                         Debug.LogWarning("Could not connect! ");
                         yield break;
-                    }
+                    }*/
                 }
             }
 
@@ -210,7 +217,14 @@ namespace PupilLabs
             Send(startLeftEye);
             Send(startRightEye);
         }
-
+        
+        public void QuitGame()
+        {
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #endif
+            Application.Quit();
+        }
         public void StartPlugin(string name, Dictionary<string, object> args = null)
         {
             Dictionary<string, object> startPluginDic = new Dictionary<string, object> {
