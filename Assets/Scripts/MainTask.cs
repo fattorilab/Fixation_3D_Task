@@ -7,8 +7,8 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using UnityEngine;
 using PupilLabs;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json;
+//using Newtonsoft.Json.Linq;
 
 
 
@@ -95,7 +95,7 @@ public class MainTask : MonoBehaviour
     private float lastevent;                             // questa variabile mi serve per capire quanto passa tra un evento e l'altro                
     private string identifier;
     private bool isMoving = false;
-    private bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
+    public bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
     [HideInInspector] public int frame_number = 0;
 
     #endregion
