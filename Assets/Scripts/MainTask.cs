@@ -16,8 +16,6 @@ public class MainTask : MonoBehaviour
 {
     #region Variables Declaration
 
-    public float pippo;
-
     [SerializeField]
 
     [HideInInspector]
@@ -31,7 +29,7 @@ public class MainTask : MonoBehaviour
     [Header("Saving info")]
     public string MEF;
     public string path_to_data = "C:/Users/stefa/Documents/LABORATORIO SIMULATO/Registrazioni_VR/";
-    [HideInInspector] public long starttime = 0;
+    [HideInInspector] public long starttime = -10000000;
 
     [Header("Reward")]
     public int RewardLength = 50;
@@ -42,7 +40,7 @@ public class MainTask : MonoBehaviour
     public string file_name_positions; // stringa con il nome del file csv che deve essere in \Assets
     public int trials_for_cond;  // numero di trial per condition
     public int current_state;   // stato corrente della tasc
-    private int last_state;     // ultimo stato prima del corrente
+    [HideInInspector] public int last_state;     // ultimo stato prima del corrente
     [HideInInspector] public string error_state;    
     public int current_trial;  //numero trial attuale
     public int trials_win;    //totale trial vinti
@@ -60,7 +58,7 @@ public class MainTask : MonoBehaviour
     public List<Vector3> target_positions = new List<Vector3>(); //defining a list because is chaning size during the runtime
     // [HideInInspector] public List<int> target_label;  // label del target associato al randomIndex;                                            QUESTO è STATO ELIMINATO? GIUSTO FRA_EDO?
     private int randomIndex;
-    public List<int> condition_list;
+    [HideInInspector] public List<int> condition_list;
 
     // variabili per la gestione  delle tempistiche delle epoche
     [Header("Epoches Info")]
@@ -68,11 +66,13 @@ public class MainTask : MonoBehaviour
     public float[] FREE_timing = { 0.3f, 0.6f, 0.9f }; //defining an array because is not chaning size during the runtime
     public float[] DELAY_timing = { 0.3f, 0.6f, 0.9f };
     public float[] RT_timing = { 0.3f, 0.6f, 0.9f };
+
     // liste con le squenze randomiche scelte in sequenza                                                                                      
     private List<int> FREE_timing_list;
     private List<int> DELAY_timing_list;
     private List<int> RT_timing_list;
-    // qui ci andara a finire la durata scelta per quel trial presa dalle liste sopra                                                            
+    // qui ci andara a finire la durata scelta per quel trial presa dalle liste sopra        
+    public float TRIAL_BEGINNING_duration = 0.5f;                                                   
     private float FREE_duration;
     private float DELAY_duration;
     private float RT_duration;
@@ -87,15 +87,15 @@ public class MainTask : MonoBehaviour
     [Header("PupilLab Info")]
     public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);  //pixel pupilla destra
     public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);   //pixel pupilla sinistra
-    public float diameterRight = float.NaN;                  //pupil dianmeter destra
-    public float diameterLeft = float.NaN;                   //pupil dianmeter sinistro
+    [HideInInspector] public float diameterRight = float.NaN;                  //pupil dianmeter destra
+    [HideInInspector] public float diameterLeft = float.NaN;                   //pupil dianmeter sinistro
 
     //public bool pupilconnection;
 
     private float lastevent;                             // questa variabile mi serve per capire quanto passa tra un evento e l'altro                
     private string identifier;
     private bool isMoving = false;
-    public bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
+    [HideInInspector] public bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
     [HideInInspector] public int frame_number = 0;
 
     #endregion
@@ -105,10 +105,11 @@ public class MainTask : MonoBehaviour
     {
         UnityEngine.Random.InitState(seed);
 
-        current_state = 0;
-        last_state = -1;
+        current_state = -2; //initial state
+        last_state = -2;
         error_state = "";
         current_trial = 0;
+        current_condition = -1;
         trials_win = 0;
         trials_lose = 0;
         RewardLength_in_sec = RewardLength / 1000f;
@@ -121,8 +122,6 @@ public class MainTask : MonoBehaviour
 
         //  serve ancora??
         Player = GameObject.Find("Player");
-
-        
 
         
         PupilDataStreamScript = GameObject.Find("PupilDataManagment").GetComponent<PupilDataStream>();        // mi collego allo script PupilDAtaManagment da cui prendo lo stream dei dati
@@ -191,37 +190,60 @@ public class MainTask : MonoBehaviour
             ardu.SendStartRecordingOE();             // Send START trigger
             first_frame = false;
             
-        }
-
-        
+        }    
 
         #region StateMachine
  
         switch (current_state)
-        {
-            case 0: //INTERTRIAL
-                if (last_state != current_state) //StateBeginning //State beginning (executed once each time the system enter the state)
-                {
+        {   
+            
+            case -2: //INIZIO TRIAL (Only once at the beginning of the task to handle pupil lab connection)
 
+                if (PupilDataStreamScript.subsCtrl.IsConnected || RequestControllerScript.ans)
+                {   
                     foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
                     {
-                        cam.backgroundColor = Color.white;
+                        cam.backgroundColor = Color.black;
                     }
+                    current_state = -1;
+                }
 
-                    current_condition = -1;
+                break;
+            
 
+            case -1: //INIZIO TRIAL (Only once at the beginning of the task to handle pupil lab connection)
+                if (last_state != current_state)
+                {   
                     lastevent = Time.time;
                     last_state = current_state;
                     error_state = "";
+                    current_condition = -1;
+
+                    foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
+                    {
+                        cam.backgroundColor = Color.black;
+                    }
+
+                }
+                // BODY
+                
+
+                //END               
+                if ((Time.time - lastevent) >= TRIAL_BEGINNING_duration && !isMoving)
+                {                 
+                    current_state = 0;
                 }
 
-                //StateBody //State body (executed every frame the system is in the state)
-                ////////////////////////////////////////////////////
-                current_condition = -1;
-               
-                if (((Time.time - lastevent) >= RewardLength_in_sec) && !isMoving && (PupilDataStreamScript.subsCtrl.IsConnected || RequestControllerScript.ans))   //StateEnd //State end (executed once each time the system exit the state)
-                {   
-                    // Prepare everything for next trial
+                break;
+
+            case 0: //TRIAL BEGINNING
+                if (last_state != current_state) //StateBeginning //State beginning (executed once each time the system enter the state)
+                {
+                    lastevent = Time.time;
+                    last_state = current_state;
+
+
+                    // Prepare everything for the trial
 
                     // Choose and instantiate the target
                     current_condition = condition_list[0];
@@ -232,8 +254,6 @@ public class MainTask : MonoBehaviour
                                                      //OLD MANNER        //randomIndex = UnityEngine.Random.Range(0, target_label.Count);
                                                                          //current_condition = target_label[randomIndex];
 
-
-
                     // Choose the random times
                     // OLD MANNER // set_epochs_duration();
 
@@ -242,15 +262,29 @@ public class MainTask : MonoBehaviour
                     DELAY_duration = DELAY_timing[DELAY_timing_list[0]];
                     RT_duration = RT_timing[RT_timing_list[0]];
 
-                    current_state = 1;
-
                     //the trial is starting
                     current_trial++;
+                }
 
+                //StateBody //State body (executed every frame the system is in the state)
+                ////////////////////////////////////////////////////               
+                if (isMoving)
+                {
+                    error_state = "ERR: Moving in state 0";
+                    current_state = -99;
+                }
+                ///////////////////////////////////////////////////
+                 //StateEnd //State end (executed once each time the system exit the state)
+                if (((Time.time - lastevent) >= TRIAL_BEGINNING_duration) && !isMoving)  
+                {   
+                    /*
                     foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
                     {
                         cam.backgroundColor = Color.black;
                     }
+                    */
+
+                    current_state = 1;
                 }
 
                 break;
@@ -263,7 +297,6 @@ public class MainTask : MonoBehaviour
                     //Beginning routine
                     lastevent = Time.time;
                     last_state = current_state;
-                    error_state = "";
                 }
 
                 //StateBody ////////////////////////////////////////
@@ -309,7 +342,6 @@ public class MainTask : MonoBehaviour
                     //Beginning routine
                     lastevent = Time.time;
                     last_state = current_state;
-                    error_state = "";
                 }
 
                 //StateBody ////////////////////////////////////////
@@ -338,7 +370,6 @@ public class MainTask : MonoBehaviour
                     //Beginning routine
                     lastevent = Time.time;
                     last_state = current_state;
-                    error_state = "";
                 }
 
                 //StateBody ////////////////////////////////////////
@@ -376,8 +407,7 @@ public class MainTask : MonoBehaviour
 
                 if (true)   //StateEnd 
                 {
-                    current_state = 0;
-                    error_state = "";
+                    current_state = -1;
                 }
 
                 break;
@@ -402,9 +432,9 @@ public class MainTask : MonoBehaviour
 
                 ////////////////////////////////////////////////////
 
-                    if (true)   //StateEnd
+                if ((Time.time - lastevent) >= RewardLength_in_sec)   //StateEnd
                 {
-                    current_state = 0;
+                    current_state = -1;
                 }
 
                 break;
@@ -435,9 +465,6 @@ public class MainTask : MonoBehaviour
         ardu.SendReward(RewardLength);
         Destroy(Target);
 
-        current_state = 0;
-        lastevent = Time.time;
-
         trials_win++;
         trials_for_target[current_condition]++;
 
@@ -451,14 +478,13 @@ public class MainTask : MonoBehaviour
     {
         Destroy(Target);
 
+        trials_lose++;
+
         condition_list = SwapVector(condition_list);
         FREE_timing_list = SwapVector(FREE_timing_list); //not strictly necessary, but better for coherence...
         DELAY_timing_list = SwapVector(DELAY_timing_list);
         RT_timing_list = SwapVector(RT_timing_list);
 
-        current_state = 0;
-        lastevent = Time.time;
-        trials_lose++;
     }
 
     public void QuitGame()
