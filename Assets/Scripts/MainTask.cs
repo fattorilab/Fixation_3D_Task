@@ -7,8 +7,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using UnityEngine;
 using PupilLabs;
-//using Newtonsoft.Json;
-//using Newtonsoft.Json.Linq;
+
 
 
 
@@ -20,11 +19,11 @@ public class MainTask : MonoBehaviour
 
     [HideInInspector]
     // Variable to hook this main_script onto the script 'PupilDataScript' that takes pupil data and the variable to understand if Pupil Lab is connected or not
-    [Header("Collegamenti")] 
-    public PupilDataStream PupilDataStreamScript;
+    [Header("Collegamenti")]
+    [System.NonSerialized] private PupilDataStream PupilDataStreamScript;
     private RequestController RequestControllerScript;
     private bool PupilDataConnessionStatus;
-    [HideInInspector] public GameObject Player;
+    [HideInInspector] private GameObject Player;
 
     [Header("Saving info")]
     public string MEF;
@@ -33,16 +32,16 @@ public class MainTask : MonoBehaviour
 
     [Header("Reward")]
     public int RewardLength = 50;
-    public int reward_counter = 0; //just for having this information readibily accessible
+    private int reward_counter = 0; //just for having this information readibily accessible
     float RewardLength_in_sec; //Only for format reasons
 
     [Header("Trials Info")]
     public string file_name_positions; // stringa con il nome del file csv che deve essere in \Assets
     public int trials_for_cond;  // numero di trial per condition
-    public int current_state;   // stato corrente della tasc
-    [HideInInspector] public int last_state;     // ultimo stato prima del corrente
-    [HideInInspector] public string error_state;    
-    public int current_trial;  //numero trial attuale
+    [System.NonSerialized] public int current_state;   // stato corrente della tasc
+    [HideInInspector] [System.NonSerialized] public int last_state;     // ultimo stato prima del corrente
+    [HideInInspector] [System.NonSerialized] public string error_state;
+    [System.NonSerialized] public int current_trial;  //numero trial attuale
     public int trials_win;    //totale trial vinti
     public int trials_lose;   //totale trial persi
     public int[] trials_for_target;  // lista che conta i trial giusti fatti per target
@@ -51,14 +50,14 @@ public class MainTask : MonoBehaviour
     [Header("Target Info")]
     [HideInInspector] public int seed = 12345;      //rabdomizza                                                                                    // che roba è??????????
     public GameObject TargetPrefab; GameObject Target; // put here the prefab
-    public Vector3 TargetCurrentPosition; // vettore in cui cadrà le coordinate del target scelto in maniera randomica 
-    [HideInInspector] public int current_condition;     // target attuale                                                                GIUSTO FRA_EDO?
+    [System.NonSerialized] public Vector3 TargetCurrentPosition; // vettore in cui cadrà le coordinate del target scelto in maniera randomica 
+    [HideInInspector] [System.NonSerialized] public int current_condition;     // target attuale                                                                GIUSTO FRA_EDO?
     public Vector3 TargetSize; // target dimensions
 
     public List<Vector3> target_positions = new List<Vector3>(); //defining a list because is chaning size during the runtime
     // [HideInInspector] public List<int> target_label;  // label del target associato al randomIndex;                                            QUESTO è STATO ELIMINATO? GIUSTO FRA_EDO?
     private int randomIndex;
-    [HideInInspector] public List<int> condition_list;
+    [HideInInspector] [System.NonSerialized] public List<int> condition_list;
 
     // variabili per la gestione  delle tempistiche delle epoche
     [Header("Epoches Info")]
@@ -79,23 +78,23 @@ public class MainTask : MonoBehaviour
     
 
     [Header("Arduino Info")]
-    public Ardu ardu;
-    public float arduX;
-    public float arduY;
+    [System.NonSerialized] public Ardu ardu;
+    [System.NonSerialized] public float arduX;
+    [System.NonSerialized] public float arduY;
     //public int dead_zone;
       
     [Header("PupilLab Info")]
-    public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);  //pixel pupilla destra
-    public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);   //pixel pupilla sinistra
-    [HideInInspector] public float diameterRight = float.NaN;                  //pupil dianmeter destra
-    [HideInInspector] public float diameterLeft = float.NaN;                   //pupil dianmeter sinistro
+    [System.NonSerialized] public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);  //pixel pupilla destra
+    [System.NonSerialized] public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);   //pixel pupilla sinistra
+    [HideInInspector] [System.NonSerialized] public float diameterRight = float.NaN;                  //pupil dianmeter destra
+    [HideInInspector] [System.NonSerialized] public float diameterLeft = float.NaN;                   //pupil dianmeter sinistro
 
     //public bool pupilconnection;
 
     private float lastevent;                             // questa variabile mi serve per capire quanto passa tra un evento e l'altro                
     private string identifier;
     private bool isMoving = false;
-    [HideInInspector] public bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
+    [HideInInspector] [System.NonSerialized] public bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
     [HideInInspector] public int frame_number = 0;
 
     #endregion
@@ -135,13 +134,6 @@ public class MainTask : MonoBehaviour
   
         trials_for_target = new int[target_positions.Count];
 
-        /*
-        for (int i = 0; i < target_positions.Count; i++)
-        {
-            target_label.Add(i); //create condition vector (targets)
-        }
-        */
-
 
         // Generating condition and timing vectors
         condition_list = CreateRandomSequence(target_positions.Count, trials_for_cond * target_positions.Count);
@@ -152,20 +144,6 @@ public class MainTask : MonoBehaviour
 
     void Update()
     {
-        // serve ancora ?
-       // PupilDataConnessionStatus = PupilDataStreamScript.subsCtrl.IsConnected;  //verifico la connessione
-
-        //if (PupilDataConnessionStatus)     // se si  connesso comincia a ciucciare i dati 
-        //{
-        //    //Debug.Log((centerRightPupilPx[0]).ToString());
-        //    centerRightPupilPx = PupilDataStreamScript.CenterRightPupilPx;
-        //    centerLeftPupilPx = PupilDataStreamScript.CenterLeftPupilPx;
-        //    diameterRight = PupilDataStreamScript.DiameterRight;
-        //    diameterLeft = PupilDataStreamScript.DiameterLeft;
-        //    ardu.SendPupilLabData(centerRightPupilPx[0], centerRightPupilPx[1], centerLeftPupilPx[0], centerLeftPupilPx[1]); // e li mando a arduino
-        //}
-        // else di controlllo sulla connessione
-        
 
         frame_number++;
         arduX = ardu.ax1;   //note: if arduino is not connected (or not working) the arduX,Y = NaN;
@@ -568,7 +546,7 @@ public class MainTask : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogWarning("La riga non ha abbastanza coordinate: " + line);
+                        Debug.LogWarning("La riga non ha abbastanza coordinate: " + fields.Length);
                     }
                 }
             }

@@ -23,7 +23,6 @@ public class Saver : MonoBehaviour
     #region Time variables
     [HideInInspector] public long starttime = 0;
     [HideInInspector] public long milliseconds = 0;
-    bool got_start = false;
     #endregion
 
     #region Saving variables
@@ -47,7 +46,7 @@ public class Saver : MonoBehaviour
     GameObject DB;
     GameObject player;
     GameObject experiment;
-    public GameObject PupilData;
+    GameObject PupilData;
     PupilDataStream PupilDataStream;
     #endregion
 
@@ -98,6 +97,7 @@ public class Saver : MonoBehaviour
 
         main = GetComponent<MainTask>();
         ardu = GetComponent<Ardu>();
+        PupilData = GameObject.Find("PupilDataManagment");
         PupilDataStream = PupilData.GetComponent<PupilDataStream>();
         DB = GameObject.Find("DB");
         player = GameObject.Find("Player");
@@ -110,21 +110,7 @@ public class Saver : MonoBehaviour
 
     void LateUpdate()
     {
-
-        if (got_start)
-        {   
-            // Add current frame data
-            addDataPerFrame();
-        }
-        else
-        {
-            if (main.first_frame) // first operating frame
-            {
-                // Sync saver start-time with main start-time
-                starttime = main.starttime;
-                got_start = true;
-            }
-        }
+        addDataPerFrame();
 
         if (Input.GetKeyDown("escape"))
         {
@@ -195,6 +181,7 @@ public class Saver : MonoBehaviour
 
     private void addDataPerFrame()
     {
+
         // Add new sub List
         PerFrameData.Add(new List<string>());
 
@@ -222,20 +209,17 @@ public class Saver : MonoBehaviour
         PerFrameData[(PerFrameData.Count - 1)].Add((player.transform.eulerAngles.x).ToString("F5"));
         PerFrameData[(PerFrameData.Count - 1)].Add((player.transform.eulerAngles.y).ToString("F5"));
         PerFrameData[(PerFrameData.Count - 1)].Add((player.transform.eulerAngles.z).ToString("F5"));
-        // Eyes
-        try //sistemare per gestire eccezioni di PupilLab!
-        {
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.PupilTimeStamps).ToString());
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterRightPupilPx[0]).ToString("F5"));
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterRightPupilPx[1]).ToString("F5"));
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterLeftPupilPx[0]).ToString("F5"));
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterLeftPupilPx[1]).ToString("F5"));
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.DiameterLeft).ToString("F5"));
-            PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.DiameterRight).ToString("F5"));
-            //PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.confidence_L).ToString("F5"));
-            //PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.confidence_R).ToString("F5"));
-        }
-        catch { }
+        // Eyes  
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.PupilTimeStamps).ToString());
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterRightPupilPx[0]).ToString("F5"));
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterRightPupilPx[1]).ToString("F5"));
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterLeftPupilPx[0]).ToString("F5"));
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.CenterLeftPupilPx[1]).ToString("F5"));
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.DiameterLeft).ToString("F5"));
+        PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.DiameterRight).ToString("F5"));
+        //PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.confidence_L).ToString("F5"));
+        //PerFrameData[(PerFrameData.Count - 1)].Add((PupilDataStream.confidence_R).ToString("F5"));
+
 
     }
 

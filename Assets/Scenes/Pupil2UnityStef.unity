@@ -677,7 +677,6 @@ MonoBehaviour:
   path_to_data: 
   path_to_MEF: 
   lastIDFromDB: 0
-  PupilData: {fileID: 0}
 --- !u!114 &1845965412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -692,7 +691,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ardu_working: 0
   testing: 0
-  COM: COM10
+  COM: COM5
   ax1: 0
   ax2: 0
   reward_counter: 0
@@ -708,29 +707,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aabfe54c959a8e46b88e8dabb7899ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pippo: 0
-  PupilDataStreamScript: {fileID: 0}
-  Player: {fileID: 0}
   MEF: lisca
-  path_to_data: C:\Users\edoar\Documents\Fattori_lab\test_data_folder
+  path_to_data: 
   starttime: 0
   RewardLength: 20
-  reward_counter: 0
-  file_name_positions: Target_positions_3
+  file_name_positions: Target_positions_9
   trials_for_cond: 2
-  current_state: 0
-  error_state: 
-  current_trial: 0
   trials_win: 0
   trials_lose: 0
   trials_for_target: 
   seed: 12345
   TargetPrefab: {fileID: 3851015196746089718, guid: 68374d10ef5a33c41bbee17c1998edc5, type: 3}
-  TargetCurrentPosition: {x: 0, y: 0, z: 0}
-  current_condition: 0
   TargetSize: {x: 1, y: 1, z: 1}
   target_positions: []
-  condition_list: 
   FREE_timing:
   - 0.3
   - 0.6
@@ -739,14 +728,7 @@ MonoBehaviour:
   - 1
   RT_timing:
   - 1
-  ardu: {fileID: 1845965412}
-  arduX: 0
-  arduY: 0
-  centerRightPupilPx: {x: NaN, y: NaN}
-  centerLeftPupilPx: {x: NaN, y: NaN}
-  diameterRight: NaN
-  diameterLeft: NaN
-  first_frame: 0
+  TRIAL_BEGINNING_duration: 0.5
   frame_number: 0
 --- !u!114 &1845965414
 MonoBehaviour:

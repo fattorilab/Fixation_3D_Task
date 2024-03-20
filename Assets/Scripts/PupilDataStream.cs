@@ -19,8 +19,7 @@ namespace PupilLabs
         public float DiameterLeft;
         public double PupilTimeStamps;
         private PupilListener listener;
-       
-        
+          
 
         void OnEnable()
         {

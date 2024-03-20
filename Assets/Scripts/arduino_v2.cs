@@ -24,7 +24,7 @@ using System.Linq;
         COM = _COM;
         JSdeadzone = _JSdeadzone;
         sp = new SerialPort("\\\\.\\" + COM, COMspeed);
-        lastSampleTime = Time.time;
+        lastSampleTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
         if (!sp.IsOpen)
         {
             Debug.Log("Apertura " + COM + ", baud " + COMspeed);
@@ -78,7 +78,7 @@ using System.Linq;
                             lastYValues.Add(yValue);
 
                             // track the timestamp of the last sample
-                            lastSampleTime = Time.time;
+                            lastSampleTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
                         }
                     }
@@ -103,7 +103,7 @@ using System.Linq;
     public bool isWorkingCorrectly() // return true if it's less than 1 sec since the last correct line was parsed
     {
         bool working = false;
-        if ((Time.time - lastSampleTime) < 1) 
+        if ((System.DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastSampleTime) < 1000) 
         {
             working = true;
         }
