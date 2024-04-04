@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using UnityEngine;
+using UnityEditor;
 using PupilLabs;
 
 
@@ -49,7 +50,7 @@ public class MainTask : MonoBehaviour
     // variables for managing the ball GameObject, taken each time from a prefab
     [Header("Target Info")]
     [HideInInspector] public int seed = 12345;      //rabdomizza                                                                                    // che roba è??????????
-    public GameObject TargetPrefab; GameObject Target; // put here the prefab
+    [System.NonSerialized] public GameObject TargetPrefab; GameObject Target; // put here the prefab
     [System.NonSerialized] public Vector3 TargetCurrentPosition; // vettore in cui cadrà le coordinate del target scelto in maniera randomica 
     [HideInInspector] [System.NonSerialized] public int current_condition;     // target attuale                                                                GIUSTO FRA_EDO?
     public Vector3 TargetSize; // target dimensions
@@ -116,7 +117,9 @@ public class MainTask : MonoBehaviour
         System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
 
-        ardu = GetComponent<Ardu>(); 
+        ardu = GetComponent<Ardu>();
+
+        TargetPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Target.prefab");
 
 
         //  serve ancora??
@@ -191,7 +194,10 @@ public class MainTask : MonoBehaviour
 
             case -1: //INIZIO TRIAL (Only once at the beginning of the task to handle pupil lab connection)
                 if (last_state != current_state)
-                {   
+                {
+                    // Check if all conditions are done and end the session
+                    if (condition_list.Count == 0) { QuitGame(); }
+
                     lastevent = Time.time;
                     last_state = current_state;
                     error_state = "";
@@ -406,7 +412,6 @@ public class MainTask : MonoBehaviour
                 }
 
                 //StateBody ////////////////////////////////////////
-                if (condition_list.Count == 0) { QuitGame();  }
 
                 ////////////////////////////////////////////////////
 

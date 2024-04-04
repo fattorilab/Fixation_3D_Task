@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -377,10 +377,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a66fbd5ffe9b9d64da304996f1919f40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _width: 960
-  _height: 540
-  _preset: 0
-  _frameRate: 25
+  _width: 1280
+  _height: 720
+  _preset: 5
+  _frameRate: 60
   path_to_data_RecorderFrames: 
   path_to_video: 
 --- !u!1 &803803443
@@ -393,9 +393,10 @@ GameObject:
   m_Component:
   - component: {fileID: 803803444}
   - component: {fileID: 803803445}
+  - component: {fileID: 803803446}
   m_Layer: 0
   m_Name: Right Camera
-  m_TagString: Untagged
+  m_TagString: RightCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -466,6 +467,24 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &803803446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 803803443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a66fbd5ffe9b9d64da304996f1919f40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _width: 1280
+  _height: 720
+  _preset: 5
+  _frameRate: 60
+  path_to_data_RecorderFrames: 
+  path_to_video: 
 --- !u!1 &1158089989
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,9 +495,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1158089990}
   - component: {fileID: 1158089991}
+  - component: {fileID: 1158089992}
   m_Layer: 0
   m_Name: Left Camera
-  m_TagString: Untagged
+  m_TagString: LeftCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -549,6 +569,24 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1158089992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158089989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a66fbd5ffe9b9d64da304996f1919f40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _width: 1280
+  _height: 720
+  _preset: 5
+  _frameRate: 60
+  path_to_data_RecorderFrames: 
+  path_to_video: 
 --- !u!1 &1363010492
 GameObject:
   m_ObjectHideFlags: 0
@@ -691,7 +729,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ardu_working: 0
   testing: 0
-  COM: COM5
+  COM: COM10
   ax1: 0
   ax2: 0
   reward_counter: 0
@@ -708,7 +746,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MEF: lisca
-  path_to_data: 
+  path_to_data: C:\Users\admin\Desktop\Registrazioni_VR_FAKE
   starttime: 0
   RewardLength: 20
   file_name_positions: Target_positions_9
@@ -717,8 +755,7 @@ MonoBehaviour:
   trials_lose: 0
   trials_for_target: 
   seed: 12345
-  TargetPrefab: {fileID: 3851015196746089718, guid: 68374d10ef5a33c41bbee17c1998edc5, type: 3}
-  TargetSize: {x: 1, y: 1, z: 1}
+  TargetSize: {x: 0.1, y: 0.1, z: 0.1}
   target_positions: []
   FREE_timing:
   - 0.3
