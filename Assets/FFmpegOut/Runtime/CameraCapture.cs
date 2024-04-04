@@ -265,6 +265,14 @@ namespace FFmpegOut
                 // Compensate the time delay.
                 _frameCount += Mathf.FloorToInt(gap * _frameRate);
             }
+
+            // ADDED BY EDO: After pushing the frame to FFmpeg, write the details to the CSV file.
+            if (_isStreamWriterInitialized)
+            {
+                long rec_time = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                _streamWriter.WriteLine($"{(rec_time - main_start_time)},{_frameCount},{reward_count}");
+            }
+
         }
 
         #endregion

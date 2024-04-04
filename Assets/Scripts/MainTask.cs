@@ -423,7 +423,6 @@ public class MainTask : MonoBehaviour
 
         #endregion
 
-
         if (Input.GetKeyDown("space"))        { ardu.SendReward(RewardLength); }
         reward_counter = ardu.reward_counter;
 
@@ -480,9 +479,11 @@ public class MainTask : MonoBehaviour
     public List<int> CreateRandomSequence(int n, int k) //n, number of elements; k, length of the required vector
     {
         var vector = new List<int>();
+        System.Random rnd = new System.Random(); // Create a new Random instance
+
         for (int i = 0; i < Math.Floor((double)k / n) + 1; i++)
         {
-            var tmp = Enumerable.Range(0, n).OrderBy(x => UnityEngine.Random.Range(0, n)).ToList();
+            var tmp = Enumerable.Range(0, n).OrderBy(x => rnd.Next(n)).ToList();
             vector.AddRange(tmp);
         }
 
@@ -514,7 +515,6 @@ public class MainTask : MonoBehaviour
         FREE_duration = FREE_timing[randomIndex_FREE];
         DELAY_duration = DELAY_timing[randomIndex_DELAY];
         RT_duration = RT_timing[randomIndex_RT];
-
     }
 
     private void LoadPositionsFromCSV()

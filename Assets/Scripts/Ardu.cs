@@ -46,6 +46,7 @@ public class Ardu : MonoBehaviour
             {
                 if (ardu.isWorkingCorrectly())
                 {
+                    ardu_working = true;
                     ax1 = ardu.getX();
                     ax2 = -ardu.getY();
                 }
@@ -54,7 +55,7 @@ public class Ardu : MonoBehaviour
                     ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
                                         "Go ahead in testing mode (no arduino)", "Exit game");
                     // You can add a delay here if you want
-                    if (ans) { testing = true; }
+                    if (ans) { testing = true; ardu_working = false; }
                     else { QuitGame(); }
                 }
             }
@@ -63,7 +64,7 @@ public class Ardu : MonoBehaviour
                 ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
                                                         "Go ahead in testing mode (no arduino)", "Exit game");
                 // You can add a delay here if you want
-                if (ans) { testing = true; }
+                if (ans) { testing = true; ardu_working = false; }
                 else { QuitGame(); }
             }
         }
