@@ -101,9 +101,8 @@ public class Ardu : MonoBehaviour
         {
             ardu.sendSerial("R" + rewardTime.ToString());
             Debug.Log("R" + rewardTime.ToString());
-            reward_counter += 1;
-
         }
+        reward_counter += 1;
     }
 
     // TRIGGER 1 BNC 
