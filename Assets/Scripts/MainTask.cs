@@ -72,7 +72,8 @@ public class MainTask : MonoBehaviour
     private List<int> DELAY_timing_list;
     private List<int> RT_timing_list;
     // qui ci andara a finire la durata scelta per quel trial presa dalle liste sopra        
-    public float TRIAL_BEGINNING_duration = 0.5f;                                                   
+    public float PRETRIAL_duration = 0.5f;
+    public float INTERTRIAL_duration = 0.5f;
     private float FREE_duration;
     private float DELAY_duration;
     private float RT_duration;
@@ -213,7 +214,7 @@ public class MainTask : MonoBehaviour
                 
 
                 //END               
-                if ((Time.time - lastevent) >= TRIAL_BEGINNING_duration && !isMoving)
+                if ((Time.time - lastevent) >= PRETRIAL_duration && !isMoving)
                 {                 
                     current_state = 0;
                 }
@@ -259,7 +260,7 @@ public class MainTask : MonoBehaviour
                 }
                 ///////////////////////////////////////////////////
                  //StateEnd //State end (executed once each time the system exit the state)
-                if (((Time.time - lastevent) >= TRIAL_BEGINNING_duration) && !isMoving)  
+                if (((Time.time - lastevent) >= INTERTRIAL_duration) && !isMoving)  
                 {   
                     /*
                     foreach (Camera cam in Player.GetComponentsInChildren<Camera>())

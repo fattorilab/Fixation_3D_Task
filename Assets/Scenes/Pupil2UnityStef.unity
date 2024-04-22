@@ -673,8 +673,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1845965409}
   - component: {fileID: 1845965413}
-  - component: {fileID: 1845965411}
   - component: {fileID: 1845965412}
+  - component: {fileID: 1845965411}
   - component: {fileID: 1845965414}
   m_Layer: 0
   m_Name: Experiment
@@ -748,7 +748,7 @@ MonoBehaviour:
   MEF: lisca
   path_to_data: 
   starttime: 0
-  RewardLength: 20
+  RewardLength: 200
   file_name_positions: Target_positions_9
   trials_for_cond: 1
   trials_win: 0
@@ -765,7 +765,8 @@ MonoBehaviour:
   - 1
   RT_timing:
   - 1
-  TRIAL_BEGINNING_duration: 0.5
+  PRETRIAL_duration: 0.5
+  INTERTRIAL_duration: 0.5
   frame_number: 0
 --- !u!114 &1845965414
 MonoBehaviour:
