@@ -379,7 +379,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _width: 1280
   _height: 720
-  _preset: 1
+  _preset: 5
   _frameRate: 60
   path_to_data_RecorderFrames: 
   path_to_video: 

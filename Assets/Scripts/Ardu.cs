@@ -2,46 +2,64 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-
 public class Ardu : MonoBehaviour
 {
+    #region Variables Declaration
+
+    // GameObject
     arduino ardu;
-    public bool ardu_working = false;
-    public bool testing = false;
+
+    // Connection bools
+    private bool ans = false;
+    bool ardu_working = true;
+    bool testing = false;
+
+    // Port
     public string COM = "COM10";
+
+    // Axes
     public float ax1 = float.NaN;
     public float ax2 = float.NaN;
+
+    // Reward counter
     public int reward_counter;
 
-    private bool ans = false;
-    //public int dead_zone;
+    #endregion
 
-
-    void Start() 
+    void Start()
     {
+        #region Connect to Arduino
+
+        // If not testing mode
         if (!testing)
         {
-            try 
+            try
             {
+                // Establish connection
                 ardu = new arduino(COM, 57600, 80);
             }
             catch
             {
-                ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino", 
+                // Notify
+                ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
                     "Go ahead in testing mode (no arduino)", "Exit game");
-                // You can add a delay here if you want
-                if (ans) { testing = true; }
+
+                // Set testing mode or quit game
+                if (ans) { testing = true; ardu_working = false; }
                 else { QuitGame(); }
             }
         }
+
+        #endregion
     }
 
-
-    // Update is called once per frame
     void Update()
     {
+        // If not testing mode
         if (!testing)
-        {   
+        {
+            #region Get coordinates from Arduino
+
             try
             {
                 if (ardu.isWorkingCorrectly())
@@ -49,12 +67,14 @@ public class Ardu : MonoBehaviour
                     ardu_working = true;
                     ax1 = ardu.getX();
                     ax2 = -ardu.getY();
+
                 }
                 else
                 {
                     ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
                                         "Go ahead in testing mode (no arduino)", "Exit game");
-                    // You can add a delay here if you want
+
+                    // If desired, add a delay until Arduino connects
                     if (ans) { testing = true; ardu_working = false; }
                     else { QuitGame(); }
                 }
@@ -63,10 +83,13 @@ public class Ardu : MonoBehaviour
             {
                 ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
                                                         "Go ahead in testing mode (no arduino)", "Exit game");
-                // You can add a delay here if you want
+
+                // If desired, add a delay until Arduino connects
                 if (ans) { testing = true; ardu_working = false; }
                 else { QuitGame(); }
             }
+
+            #endregion
         }
         else
         {
@@ -74,6 +97,7 @@ public class Ardu : MonoBehaviour
             ax2 = float.NaN;
         }
 
+        // Manual quit
         if (Input.GetKey("escape"))
         {
             if (!testing && ardu_working)
@@ -83,21 +107,23 @@ public class Ardu : MonoBehaviour
 
             QuitGame();
         }
-
-
     }
+
+
+    #region Methods 
 
     public void QuitGame()
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
         Application.Quit();
     }
 
+    // Send signal to deliver reward
     public void SendReward(int rewardTime)
     {
-        if (ardu_working )
+        if (ardu_working)
         {
             ardu.sendSerial("R" + rewardTime.ToString());
             Debug.Log("R" + rewardTime.ToString());
@@ -105,7 +131,7 @@ public class Ardu : MonoBehaviour
         reward_counter += 1;
     }
 
-    // TRIGGER 1 BNC 
+    // TRIGGER 1 BNC - Activate OpenEphys (neural recording)
     public void SendStartRecordingOE()
     {
         if (ardu_working && !testing)
@@ -114,7 +140,7 @@ public class Ardu : MonoBehaviour
             Debug.Log("REC OE ON");
         }
     }
-    // TRIGGER 1 BNC
+    // TRIGGER 1 BNC - Deactivate OpenEphys (neural recording)
     public void SendStopRecordingOE()
     {
         if (ardu_working && !testing)
@@ -124,12 +150,15 @@ public class Ardu : MonoBehaviour
         }
     }
 
+    // Send eye data to arduino 
     public void SendPupilLabData(float RightPupilPixel_x, float RightPupilPixel_y, float LeftPupilPixel_x, float LeftPupilPixel_y)
     {
         if (ardu_working && !testing)
         {
-           ardu.sendSerial("Rx" + RightPupilPixel_x.ToString() + "Ry" + RightPupilPixel_y.ToString() + "Lx" + LeftPupilPixel_x.ToString() + "Ly" + LeftPupilPixel_y.ToString());
-            
+            ardu.sendSerial("Rx" + RightPupilPixel_x.ToString() + "Ry" + RightPupilPixel_y.ToString() + "Lx" + LeftPupilPixel_x.ToString() + "Ly" + LeftPupilPixel_y.ToString());
+
         }
     }
+
+    #endregion
 }
