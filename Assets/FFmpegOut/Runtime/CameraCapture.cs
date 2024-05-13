@@ -68,6 +68,9 @@ namespace FFmpegOut
         float _startTime;
         int _frameDropCount;
 
+        // ADDED BY EDO
+        int _frameDelay;
+
         float FrameTime {
             get { return _startTime + (_frameCount - 0.5f) / _frameRate; }
         }
@@ -161,7 +164,7 @@ namespace FFmpegOut
         IEnumerator Start()
         {
             // Sync with FFmpeg pipe thread at the end of every frame.
-            for (var eof = new WaitForEndOfFrame();;)
+            for (var eof = new WaitForEndOfFrame(); ;)
             {
                 yield return eof;
                 _session?.CompletePushFrames();
@@ -175,7 +178,8 @@ namespace FFmpegOut
             #region ADDED BY EDO: SAVE RECORDER FRAMES
 
             GameObject experiment = GameObject.Find("Experiment");
-            int frame_num = experiment.GetComponent<MainTask>().frame_number;
+            int main_frame_num = experiment.GetComponent<MainTask>().frame_number;
+            int last_state = experiment.GetComponent<MainTask>().last_state;
             long main_start_time = experiment.GetComponent<MainTask>().starttime;
             int reward_count = experiment.GetComponent<Ardu>().reward_counter;
 
@@ -193,7 +197,7 @@ namespace FFmpegOut
                     path_to_data_RecorderFrames = Path.Combine(path_to_MEF, "VIDEO",
                         (DateTime.Now.ToString("yyyy_MM_dd") + "_ID" + (lastIDFromDB + 1).ToString() + $"_{camera.tag}" + "_recorderFrames.csv"));
                     _streamWriter = new StreamWriter(path_to_data_RecorderFrames);
-                    _streamWriter.WriteLine("Timestamp,Frame,Reward_count");
+                    _streamWriter.WriteLine("Timestamp,Frame_time,Rec_Frame,Droppings,Dropped_frames,Reward_count,Current_state");
 
                     // Set the flag to true after initializing the StreamWriter
                     _isStreamWriterInitialized = true;
@@ -210,7 +214,7 @@ namespace FFmpegOut
                 // object to keep frames presented on the screen.
                 if (camera.targetTexture == null)
                 {
-                    _tempRT = new RenderTexture(_width, _height, 24, GetTargetFormat(camera)); 
+                    _tempRT = new RenderTexture(_width, _height, 24, GetTargetFormat(camera));
                     _tempRT.antiAliasing = GetAntiAliasingLevel(camera);
                     camera.targetTexture = _tempRT;
                     _blitter = Blitter.CreateInstance(camera);
@@ -227,6 +231,9 @@ namespace FFmpegOut
                 _startTime = Time.time;
                 _frameCount = 0;
                 _frameDropCount = 0;
+
+                // ADDED BY EDO
+                _frameDelay = 0;
             }
 
             var gap = Time.time - FrameTime;
@@ -243,6 +250,10 @@ namespace FFmpegOut
                 // Push the current frame to FFmpeg.
                 _session.PushFrame(camera.targetTexture);
                 _frameCount++;
+
+                // ADDED BY EDO: After pushing the frame to FFmpeg, write the details to the CSV file.
+                addRecorderFrameRow(main_start_time, reward_count, last_state);
+
             }
             else if (gap < delta * 2)
             {
@@ -251,8 +262,17 @@ namespace FFmpegOut
                 // an efficient way to catch up. We should think about
                 // implementing frame duplication in a more proper way. #fixme
                 _session.PushFrame(camera.targetTexture);
+                _frameCount += 1;
+
+                // ADDED BY EDO: After pushing the frame to FFmpeg, write the details to the CSV file.
+                addRecorderFrameRow(main_start_time, reward_count, last_state);
+
                 _session.PushFrame(camera.targetTexture);
-                _frameCount += 2;
+                _frameCount += 1;
+
+                // ADDED BY EDO: After pushing the frame to FFmpeg, write the details to the CSV file.
+                addRecorderFrameRow(main_start_time, reward_count, last_state);
+
             }
             else
             {
@@ -264,15 +284,29 @@ namespace FFmpegOut
 
                 // Compensate the time delay.
                 _frameCount += Mathf.FloorToInt(gap * _frameRate);
+
+                // ADDED BY EDO: After pushing the frame to FFmpeg, write the details to the CSV file
+
+                _frameDelay += Mathf.FloorToInt(gap * _frameRate);
+
+                addRecorderFrameRow(main_start_time, reward_count, last_state);
             }
 
+        }
+
+        #endregion
+
+
+        #region ADDED BY EDO: Methods
+
+        private void addRecorderFrameRow(long main_start_time, int reward_count, int last_state)
+        {
             // ADDED BY EDO: After pushing the frame to FFmpeg, write the details to the CSV file.
             if (_isStreamWriterInitialized)
             {
                 long rec_time = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                _streamWriter.WriteLine($"{(rec_time - main_start_time)},{_frameCount},{reward_count}");
+                _streamWriter.WriteLine($"{(rec_time - main_start_time)},{FrameTime},{_frameCount},{_frameDropCount},{_frameDelay},{reward_count},{last_state}");
             }
-
         }
 
         #endregion

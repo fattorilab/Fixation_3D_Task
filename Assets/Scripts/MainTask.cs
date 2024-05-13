@@ -194,6 +194,7 @@ public class MainTask : MonoBehaviour
             
 
             case -1: //INIZIO TRIAL (Only once at the beginning of the task to handle pupil lab connection)
+
                 if (last_state != current_state)
                 {
                     // Check if all conditions are done and end the session
