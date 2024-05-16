@@ -58,38 +58,9 @@ public class Ardu : MonoBehaviour
         // If not testing mode
         if (!testing)
         {
-            #region Get coordinates from Arduino
-
-            try
-            {
-                if (ardu.isWorkingCorrectly())
-                {
-                    ardu_working = true;
-                    ax1 = ardu.getX();
-                    ax2 = -ardu.getY();
-
-                }
-                else
-                {
-                    ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
-                                        "Go ahead in testing mode (no arduino)", "Exit game");
-
-                    // If desired, add a delay until Arduino connects
-                    if (ans) { testing = true; ardu_working = false; }
-                    else { QuitGame(); }
-                }
-            }
-            catch // something went wrong (maybe arduino disconnected?)
-            {
-                ans = EditorUtility.DisplayDialog("Arduino Connection Error", "Unable to read correctly from the Arduino",
-                                                        "Go ahead in testing mode (no arduino)", "Exit game");
-
-                // If desired, add a delay until Arduino connects
-                if (ans) { testing = true; ardu_working = false; }
-                else { QuitGame(); }
-            }
-
-            #endregion
+            // Get coordinates from Arduino
+            ax1 = ardu.getX();
+            ax2 = -ardu.getY();
         }
         else
         {

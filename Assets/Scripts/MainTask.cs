@@ -16,128 +16,185 @@ public class MainTask : MonoBehaviour
 {
     #region Variables Declaration
 
+    #region GameObjects and components
+
     [SerializeField]
 
     [HideInInspector]
-    // Variable to hook this main_script onto the script 'PupilDataScript' that takes pupil data and the variable to understand if Pupil Lab is connected or not
-    [Header("Collegamenti")]
-    [System.NonSerialized] private PupilDataStream PupilDataStreamScript;
+    [Header("GameObjects and components")]
+
+    // Cams
+    [System.NonSerialized] Camera camM;
+    [System.NonSerialized] Camera camL;
+    [System.NonSerialized] Camera camR;
+
+    // Pupil
+    [System.NonSerialized] public PupilDataStream PupilDataStreamScript;
     private RequestController RequestControllerScript;
     private bool PupilDataConnessionStatus;
-    [HideInInspector] private GameObject Player;
+
+    // Game
+    Rigidbody player_rb;
+    [HideInInspector] GameObject environment;
+    [HideInInspector] GameObject experiment;
+    [HideInInspector] GameObject player;
+
+    #endregion
+
+    #region Saving info
 
     [Header("Saving info")]
     public string MEF;
     public string path_to_data = "C:/Users/stefa/Documents/LABORATORIO SIMULATO/Registrazioni_VR/";
     [HideInInspector] public long starttime = -10000000;
+    private string identifier;
+    [HideInInspector] public int seed = 12345;
+    [HideInInspector] public int frame_number = 0;
+
+    #endregion
+
+    #region Reward info
 
     [Header("Reward")]
     public int RewardLength = 50;
-    private int reward_counter = 0; //just for having this information readibily accessible
-    float RewardLength_in_sec; //Only for format reasons
+    private float RewardLength_in_sec;
+    public int reward_counter = 0;
+
+    #endregion
+
+    #region Trials Info
 
     [Header("Trials Info")]
-    public string file_name_positions; // stringa con il nome del file csv che deve essere in \Assets
-    public int trials_for_cond;  // numero di trial per condition
-    [System.NonSerialized] public int current_state;   // stato corrente della tasc
-    [HideInInspector] [System.NonSerialized] public int last_state;     // ultimo stato prima del corrente
-    [HideInInspector] [System.NonSerialized] public string error_state;
-    [System.NonSerialized] public int current_trial;  //numero trial attuale
-    public int trials_win;    //totale trial vinti
-    public int trials_lose;   //totale trial persi
-    public int[] trials_for_target;  // lista che conta i trial giusti fatti per target
 
-    // variables for managing the ball GameObject, taken each time from a prefab
-    [Header("Target Info")]
-    [HideInInspector] public int seed = 12345;      //rabdomizza                                                                                    // che roba è??????????
-    [System.NonSerialized] public GameObject TargetPrefab; GameObject Target; // put here the prefab
-    [System.NonSerialized] public Vector3 TargetCurrentPosition; // vettore in cui cadrà le coordinate del target scelto in maniera randomica 
-    [HideInInspector] [System.NonSerialized] public int current_condition;     // target attuale                                                                GIUSTO FRA_EDO?
-    public Vector3 TargetSize; // target dimensions
+    // Trials
+    public int trials_win;
+    public int trials_lose;
+    [System.NonSerialized] public int current_trial;
+    public int[] trials_for_target;
+    public int trials_for_cond;
 
-    public List<Vector3> target_positions = new List<Vector3>(); //defining a list because is chaning size during the runtime
-    // [HideInInspector] public List<int> target_label;  // label del target associato al randomIndex;                                            QUESTO è STATO ELIMINATO? GIUSTO FRA_EDO?
+    // States
+    public int current_state;
+    [System.NonSerialized] public int last_state;
+    [System.NonSerialized] public string error_state;
+
+    // Conditions
     private int randomIndex;
-    [HideInInspector] [System.NonSerialized] public List<int> condition_list;
+    public List<int> condition_list;
+    [System.NonSerialized] public int current_condition;
 
-    // variabili per la gestione  delle tempistiche delle epoche
+    // Tracking events
+    private float lastevent;
+    private bool first_frame;
+
+    // Moving timer
+    private static bool isMoving = false;
+
+    #endregion
+
+    #region Target Info
+
+    [Header("Target Info")]
+    public string file_name_positions;
+    [System.NonSerialized] public GameObject TargetPrefab; GameObject Target;
+    [System.NonSerialized] public Vector3 TargetCurrentPosition;
+    public Vector3 TargetSize;
+
+    public List<Vector3> target_positions = new List<Vector3>();
+
+    #endregion
+
+    #region Epochs Info
+
     [Header("Epoches Info")]
 
-    public float[] FREE_timing = { 0.3f, 0.6f, 0.9f }; //defining an array because is not chaning size during the runtime
+    // Array, because is not changing size during the runtime
+    public float[] FREE_timing = { 0.3f, 0.6f, 0.9f }; 
     public float[] DELAY_timing = { 0.3f, 0.6f, 0.9f };
     public float[] RT_timing = { 0.3f, 0.6f, 0.9f };
 
-    // liste con le squenze randomiche scelte in sequenza                                                                                      
     private List<int> FREE_timing_list;
     private List<int> DELAY_timing_list;
     private List<int> RT_timing_list;
-    // qui ci andara a finire la durata scelta per quel trial presa dalle liste sopra        
+   
     public float PRETRIAL_duration = 0.5f;
     public float INTERTRIAL_duration = 0.5f;
     private float FREE_duration;
     private float DELAY_duration;
     private float RT_duration;
-    
+
+    #endregion
+
+    #region Arduino Info
 
     [Header("Arduino Info")]
     [System.NonSerialized] public Ardu ardu;
     [System.NonSerialized] public float arduX;
     [System.NonSerialized] public float arduY;
-    //public int dead_zone;
-      
+
+    #endregion
+
+    #region PupilLab Info
+
     [Header("PupilLab Info")]
-    [System.NonSerialized] public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);  //pixel pupilla destra
-    [System.NonSerialized] public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);   //pixel pupilla sinistra
-    [HideInInspector] [System.NonSerialized] public float diameterRight = float.NaN;                  //pupil dianmeter destra
-    [HideInInspector] [System.NonSerialized] public float diameterLeft = float.NaN;                   //pupil dianmeter sinistro
+    [System.NonSerialized] public Vector2 centerRightPupilPx = new Vector2(float.NaN, float.NaN);
+    [System.NonSerialized] public Vector2 centerLeftPupilPx = new Vector2(float.NaN, float.NaN);
+    [System.NonSerialized] public float diameterRight = float.NaN;
+    [System.NonSerialized] public float diameterLeft = float.NaN;
 
-    //public bool pupilconnection;
-
-    private float lastevent;                             // questa variabile mi serve per capire quanto passa tra un evento e l'altro                
-    private string identifier;
-    private bool isMoving = false;
-    [HideInInspector] [System.NonSerialized] public bool first_frame;                         // questa variabile mi serve per capire se ho appena lanciato il gioco o no, cosi prendo il last event appena si attiva la connessione
-    [HideInInspector] public int frame_number = 0;
+    #endregion
 
     #endregion
 
     // Start is called before the first frame update
     void Start()
     {
-        UnityEngine.Random.InitState(seed);
 
-        current_state = -2; //initial state
+        // Generate random seed
+        System.Random rand = new System.Random();
+        seed = rand.Next();
+
+        // Setup
+        UnityEngine.Random.InitState(seed);
+        System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+        first_frame = true;
+
+        // States
+        current_state = -2;
         last_state = -2;
         error_state = "";
+
+        // Trials
         current_trial = 0;
-        current_condition = -1;
         trials_win = 0;
         trials_lose = 0;
-        RewardLength_in_sec = RewardLength / 1000f;
-        first_frame = true;
-        System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
-
+        // GameObjects
         ardu = GetComponent<Ardu>();
+        player = GameObject.Find("Player");
+        player_rb = player.GetComponent<Rigidbody>();
+        experiment = GameObject.Find("Experiment");
+        environment = GameObject.Find("Environment");
 
+        // PupilLab
+        PupilDataStreamScript = GameObject.Find("PupilDataManagment").GetComponent<PupilDataStream>();
+        RequestControllerScript = GameObject.Find("PupilDataManagment").GetComponent<RequestController>();
+
+        // Init cameras
+        camM = GameObject.Find("Main Camera").GetComponent<Camera>();
+        camL = GameObject.Find("Left Camera").GetComponent<Camera>();
+        camR = GameObject.Find("Right Camera").GetComponent<Camera>();
+
+        current_condition = -1;
+
+        // Target Prefab
         TargetPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Target.prefab");
 
+        // Import target_positions from CSV file
+        LoadPositionsFromCSV();
 
-        //  serve ancora??
-        Player = GameObject.Find("Player");
-
-        
-        PupilDataStreamScript = GameObject.Find("PupilDataManagment").GetComponent<PupilDataStream>();        // mi collego allo script PupilDAtaManagment da cui prendo lo stream dei dati
-        RequestControllerScript = GameObject.Find("PupilDataManagment").GetComponent<RequestController>();    // mi collego allo script PupilDAtaManagment da cui prendo la richiesta di controllo per unity
-     
-        
-
-       
-        LoadPositionsFromCSV();     //import target_positions from csv file
-
-  
+        // Define number of trials per each target
         trials_for_target = new int[target_positions.Count];
-
 
         // Generating condition and timing vectors
         condition_list = CreateRandomSequence(target_positions.Count, trials_for_cond * target_positions.Count);
@@ -148,14 +205,19 @@ public class MainTask : MonoBehaviour
 
     void Update()
     {
-
+        // Increase number of frames
         frame_number++;
-        arduX = ardu.ax1;   //note: if arduino is not connected (or not working) the arduX,Y = NaN;
+
+        RewardLength_in_sec = RewardLength / 1000f;
+
+        // Get coordinates from Ardu
+        arduX = ardu.ax1; 
         arduY = ardu.ax2;
 
-        if ((!float.IsNaN(arduX) && arduX != 0) || (!float.IsNaN(arduY) && arduY != 0) || Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0 ) //if arduX is nan, I cannot compare it with 0
+        // Check if the player is moving the joystick
+        if ((!float.IsNaN(arduX) && arduX != 0) || (!float.IsNaN(arduY) && arduY != 0) || Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0) //if arduX is nan, I cannot compare it with 0
         {
-            
+
             isMoving = true;
         }
         else
@@ -163,37 +225,46 @@ public class MainTask : MonoBehaviour
             isMoving = false;
         }
 
-
-
-        if (first_frame) // first operating frame 
+        // Start on first operating frame
+        if (first_frame)
         {
             Debug.Log("START TASK");
-            starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds(); //start time main task unity
-            ardu.SendStartRecordingOE();             // Send START trigger
+            // Start time main task unity
+            starttime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            // Send START trigger
+            ardu.SendStartRecordingOE();
+
             first_frame = false;
-            
-        }    
+        }
+
+        // Manual reward
+        if (Input.GetKeyDown("space")) { ardu.SendReward(RewardLength); }
+        reward_counter = ardu.reward_counter;
 
         #region StateMachine
- 
+
         switch (current_state)
         {   
             
-            case -2: //INIZIO TRIAL (Only once at the beginning of the task to handle pupil lab connection)
+            case -2: // TASK BEGINS
 
                 if (PupilDataStreamScript.subsCtrl.IsConnected || RequestControllerScript.ans)
                 {   
-                    foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
+                    foreach (Camera cam in player.GetComponentsInChildren<Camera>())
                     {
                         cam.backgroundColor = Color.black;
                     }
+
                     current_state = -1;
                 }
 
                 break;
-            
 
-            case -1: //INIZIO TRIAL (Only once at the beginning of the task to handle pupil lab connection)
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case -1: // INTERTRIAL
+
+                #region State Beginning (executed once upon entering)
 
                 if (last_state != current_state)
                 {
@@ -205,25 +276,39 @@ public class MainTask : MonoBehaviour
                     error_state = "";
                     current_condition = -1;
 
-                    foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
+                    foreach (Camera cam in player.GetComponentsInChildren<Camera>())
                     {
                         cam.backgroundColor = Color.black;
                     }
 
                 }
-                // BODY
-                
 
-                //END               
+                #endregion
+
+                #region State Body (executed every frame while in state)
+
+                current_condition = -1;
+
+                #endregion
+
+                #region State End (executed once upon exiting)    
+
                 if ((Time.time - lastevent) >= PRETRIAL_duration && !isMoving)
                 {                 
                     current_state = 0;
                 }
+                #endregion
 
                 break;
 
-            case 0: //TRIAL BEGINNING
-                if (last_state != current_state) //StateBeginning //State beginning (executed once each time the system enter the state)
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 0: // BASELINE
+
+                #region State Beginning (executed once upon entering)
+
+                if (last_state != current_state)
                 {
                     lastevent = Time.time;
                     last_state = current_state;
@@ -236,12 +321,7 @@ public class MainTask : MonoBehaviour
                     TargetCurrentPosition = target_positions[current_condition];
                     Target = Instantiate(TargetPrefab, TargetCurrentPosition, TargetPrefab.transform.rotation);
                     Target.transform.localScale = TargetSize;
-                    Target.GetComponent<MeshRenderer>().enabled = false; //instantiate the target (not visible)
-                                                     //OLD MANNER        //randomIndex = UnityEngine.Random.Range(0, target_label.Count);
-                                                                         //current_condition = target_label[randomIndex];
-
-                    // Choose the random times
-                    // OLD MANNER // set_epochs_duration();
+                    Target.GetComponent<MeshRenderer>().enabled = false;
 
                     // Picking first time from the timing list to select epoch durations in this trial
                     FREE_duration = FREE_timing[FREE_timing_list[0]];
@@ -251,59 +331,62 @@ public class MainTask : MonoBehaviour
                     //the trial is starting
                     current_trial++;
                 }
+                #endregion
 
-                //StateBody //State body (executed every frame the system is in the state)
-                ////////////////////////////////////////////////////               
+                #region State Body (executed every frame while in state)
+
                 if (isMoving)
                 {
                     error_state = "ERR: Moving in state 0";
                     current_state = -99;
                 }
-                ///////////////////////////////////////////////////
-                 //StateEnd //State end (executed once each time the system exit the state)
+                #endregion
+
+                #region State End (executed once upon exiting)
                 if (((Time.time - lastevent) >= INTERTRIAL_duration) && !isMoving)  
                 {   
-                    /*
-                    foreach (Camera cam in Player.GetComponentsInChildren<Camera>())
-                    {
-                        cam.backgroundColor = Color.black;
-                    }
-                    */
 
                     current_state = 1;
                 }
+                #endregion
 
                 break;
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
-            case 1: //FREE
-                if (last_state != current_state) //StateBeginning
+            case 1: // FREE
+
+                #region State Beginning
+                if (last_state != current_state)
                 {
                     //Beginning routine
                     lastevent = Time.time;
                     last_state = current_state;
                 }
+                #endregion
 
-                //StateBody ////////////////////////////////////////
+                #region State Body
                 if (isMoving)
                 {
                     error_state = "ERR: Moving in FREE";
                     current_state = -99;
                 }
-                ////////////////////////////////////////////////////
+                #endregion
 
-
-                if ((Time.time - lastevent) >= FREE_duration && !isMoving) //StateEnd
+                #region State End
+                if ((Time.time - lastevent) >= FREE_duration && !isMoving)
                 {
                     current_state = 2;
                 }
+                #endregion
 
                 break;
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            case 2: //DELAY
+            case 2: // DELAY
+
+                #region State Beginning
                 if (last_state != current_state) //StateBeginning
                 {
                     // Switch ON target and set color
@@ -329,26 +412,32 @@ public class MainTask : MonoBehaviour
                     lastevent = Time.time;
                     last_state = current_state;
                 }
+                #endregion
 
-                //StateBody ////////////////////////////////////////
+                #region State Body
                 if (isMoving)
                 {
                     error_state = "ERR: Moving in DELAY";
                     current_state = -99;
                 }
-                ////////////////////////////////////////////////////
+                #endregion
 
-                if ((Time.time - lastevent) >= DELAY_duration && !isMoving)   //StateEnd
+                #region State End
+                if ((Time.time - lastevent) >= DELAY_duration && !isMoving)
                 {
                     current_state = 3;
                 }
+                #endregion
 
                 break;
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            case 3: //RT
-                if (last_state != current_state) //StateBeginning
+            case 3: // RT
+
+                #region State Beginning
+
+                if (last_state != current_state) 
                 {
                     // Switch target color
                     Target.GetComponent<MeshRenderer>().material.color = Color.red;
@@ -357,26 +446,34 @@ public class MainTask : MonoBehaviour
                     lastevent = Time.time;
                     last_state = current_state;
                 }
+                #endregion
 
-                //StateBody ////////////////////////////////////////
+                #region State Body
+
                 if (isMoving) 
                 {
                     current_state = 99;
                 }
-                ////////////////////////////////////////////////////
+                #endregion
 
-                if ((Time.time - lastevent) >= RT_duration && !isMoving)   //StateEnd
+                #region State End
+
+                if ((Time.time - lastevent) >= RT_duration && !isMoving)   
                 {
                     error_state = "ERR: Not Moving in RT";
                     current_state = -99;
                 }
+                #endregion
 
                 break;
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            case -99: //ERROR
-                if (last_state != current_state) //StateBeginning
+            case -99: // ERROR
+
+                #region State Beginning
+
+                if (last_state != current_state) 
                 {
                     Debug.Log(error_state);
                     GetComponent<Saver>().addObjectEnd(identifier);
@@ -386,22 +483,28 @@ public class MainTask : MonoBehaviour
                     lastevent = Time.time;
                     last_state = current_state;
                 }
+                #endregion
 
-                //StateBody ////////////////////////////////////////
+                #region State Body
 
-                ////////////////////////////////////////////////////
+                #endregion
 
-                if (true)   //StateEnd 
+                #region State End
+                if (true)
                 {
                     current_state = -1;
                 }
+                #endregion
 
                 break;
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            case 99: //WIN
-                if (last_state != current_state) //StateBeginning
+            case 99: // WIN
+
+                #region State Beginning
+
+                if (last_state != current_state)
                 {
                     Debug.Log("TRIAL DONE");
                     GetComponent<Saver>().addObjectEnd(identifier);
@@ -413,29 +516,30 @@ public class MainTask : MonoBehaviour
 
                 }
 
-                //StateBody ////////////////////////////////////////
+                #endregion
 
-                ////////////////////////////////////////////////////
+                #region State Body
 
-                if ((Time.time - lastevent) >= RewardLength_in_sec)   //StateEnd
+                #endregion
+
+                #region State End
+                if ((Time.time - lastevent) >= RewardLength_in_sec)
                 {
                     current_state = -1;
                 }
+                #endregion
 
                 break;
 
 
         }
 
-
         #endregion
-
-        if (Input.GetKeyDown("space"))        { ardu.SendReward(RewardLength); }
-        reward_counter = ardu.reward_counter;
-
     }
 
- 
+    #region Methods
+
+    #region Quit
 
     void OnApplicationQuit()
     {
@@ -443,6 +547,22 @@ public class MainTask : MonoBehaviour
         Debug.Log("END TASK");
         QuitGame();
     }
+
+    public void QuitGame()
+    {
+        // save any game data here
+#if UNITY_EDITOR
+        // Application.Quit() does not work in the editor so
+        // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    #endregion
+
+    #region Reset
 
     void reset_win()
     {
@@ -471,17 +591,9 @@ public class MainTask : MonoBehaviour
 
     }
 
-    public void QuitGame()
-    {
-        // save any game data here
-        #if UNITY_EDITOR
-        // Application.Quit() does not work in the editor so
-        // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
-        UnityEditor.EditorApplication.isPlaying = false;
-        #else
-        Application.Quit();
-        #endif
-    }
+    #endregion
+
+    #region Conditions
 
     public List<int> CreateRandomSequence(int n, int k) //n, number of elements; k, length of the required vector
     {
@@ -524,6 +636,10 @@ public class MainTask : MonoBehaviour
         RT_duration = RT_timing[randomIndex_RT];
     }
 
+    #endregion
+
+    #region Targets
+
     private void LoadPositionsFromCSV()
     {
         string filePath = Application.dataPath + "/" + file_name_positions + ".csv";
@@ -563,4 +679,9 @@ public class MainTask : MonoBehaviour
             Debug.LogError("Il file non esiste: " + filePath);
         }
     }
+
+    #endregion
+
+    #endregion
+
 }
