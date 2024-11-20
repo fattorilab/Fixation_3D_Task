@@ -15,22 +15,15 @@ public class InteractWithDB : MonoBehaviour
     string path_to_data;
     GameObject experiment;
 
-    void Start()
-    {
-        experiment = GameObject.Find("Experiment");
-        string MEF = experiment.GetComponent<FixationTask>().MEF;
-        path_to_data = experiment.GetComponent<FixationTask>().path_to_data;
+    void Start() { }
 
-        if (MEF == "ciuffa") { path_to_data = path_to_data + "MEF27/esperimentiVR.db"; }
-        else if (MEF == "lisca") { path_to_data = path_to_data + "MEF28/esperimentiVR.db"; }
-    }
-
-    public int GetLastIDfromDB()
+    public int GetLastIDfromDB(string path_to_DB)
     {
+
         int lastID = -1; // Initialize lastID with a default value in case no records are found
 
-        Debug.Log("Connecting to DB " + $"DB_filepath={path_to_data} for reading last ID");
-        conn = "URI=file:" + path_to_data;
+        Debug.Log($"Connecting to DB (DB_filepath={path_to_DB}) to READ LAST ID");
+        conn = "URI=file:" + path_to_DB;
 
         using (dbconn = new SqliteConnection(conn))
         {
@@ -59,10 +52,10 @@ public class InteractWithDB : MonoBehaviour
     }
 
 
-    public void AddRecording(int new_ID, string new_Date, string new_Task, string new_Param)
+    public void AddRecording(string path_to_DB, int new_ID, string new_Date, string new_Task, string new_Param)
     {
-        Debug.Log("Connecting to DB " + $"DB_filepath={path_to_data} to add new recording");
-        conn = "URI=file:" + path_to_data;
+        Debug.Log("Connecting to DB " + $"DB_filepath={path_to_DB} to ADD NEW RECORDING");
+        conn = "URI=file:" + path_to_DB;
 
         using (dbconn = new SqliteConnection(conn))
         {

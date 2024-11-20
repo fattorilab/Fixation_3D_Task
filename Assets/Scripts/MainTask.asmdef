@@ -1,0 +1,16 @@
+{
+    "name": "MainTask",
+    "rootNamespace": "",
+    "references": [
+        "GUID:08ebc6c19f6268d4b8c9ae7a2d673069"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
